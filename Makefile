@@ -1,24 +1,18 @@
-.PHONY: install nvim lsp tools
+.PHONY: install nvim tools lsp
 
-install: nvim lsp tools
+install: nvim tools lsp
 
 nvim:
-	@echo "Installing Neovim config..."
+	@echo "→ Installing Neovim config..."
 	mkdir -p ~/.config
-	ln -sfn $(CURDIR) ~/.config/nvim
-
-lsp:
-	@echo "Installing LSP servers..."
-	nvim --headless "+MasonInstall pyright lua-language-server bash-language-server typescript-language-server" +qa
+	ln -sfn "$(CURDIR)" ~/.config/nvim
 
 tools:
-	@echo "Installing CLI tools..."
-	sudo pacman -S --needed \
-		ripgrep \
-		fd \
-		fzf \
-		git \
-		curl \
-		wget \
-		unzip
+	@echo "→ Installing CLI tools..."
+	@./scripts/install-tools.sh
 
+lsp:
+	@echo "→ Installing LSP servers..."
+	nvim --headless \
+		"+MasonInstall pyright lua-language-server bash-language-server typescript-language-server" \
+		+qa
