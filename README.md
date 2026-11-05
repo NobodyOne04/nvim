@@ -28,7 +28,7 @@ make install
 Other targets: `make update` (update plugins, rewrite the lockfile, then commit it), `make check` (headless start,
 fails on errors), `make startup` (timing), `make health`, `make unlink` (restore your previous config).
 
-A [Nerd Font](https://www.nerdfonts.com) is needed for icons (Ghostty bundles the symbols).
+A [Nerd Font](https://www.nerdfonts.com) is needed for icons (`ttf-jetbrains-mono-nerd`; kitty picks up its symbols automatically).
 Copilot: run `:Copilot setup` once; the token lives in `~/.config/github-copilot`.
 
 ## Layout

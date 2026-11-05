@@ -16,7 +16,7 @@ return {
 		config = function()
 			require("tokyonight").setup({
 				style = "moon",
-				transparent = true, -- Ghostty's background shows through
+				transparent = true, -- the terminal's background shows through
 				terminal_colors = true,
 				styles = {
 					comments = { italic = true },
