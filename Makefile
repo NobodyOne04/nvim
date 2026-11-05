@@ -46,7 +46,7 @@ update: ## Update plugins to latest and rewrite lazy-lock.json
 	@git diff --stat lazy-lock.json
 
 lsp: ## Install language servers and goimports with mason
-	nvim --headless "+MasonInstall $(SERVERS)" +qa
+	MASON_PKGS="$(SERVERS)" nvim --headless -c "luafile scripts/mason-install.lua"
 
 check: ## Start headless; show warnings, fail on startup errors
 	@out=$$(nvim --headless "+qa" 2>&1); \
