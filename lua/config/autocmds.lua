@@ -16,26 +16,44 @@ au("BufReadPost", {
 -- keep splits even when the terminal is resized
 au("VimResized", { group = group, command = "tabdo wincmd =" })
 
+
+-- cursor line only in the focused window, so it's clear which split is active
+au({ "WinEnter", "BufWinEnter" }, {
+	group = group,
+	callback = function()
+		if vim.bo.buftype == "" then vim.wo.cursorline = true end
+	end,
+})
+au("WinLeave", {
+	group = group,
+	callback = function()
+		if vim.bo.buftype == "" then vim.wo.cursorline = false end
+	end,
+})
+
 -- close helper windows with q
 au("FileType", {
 	group = group,
-	pattern = { "help", "qf", "checkhealth", "lspinfo", "man", "notify" },
+	pattern = { "help", "qf", "checkhealth", "lspinfo", "man", "notify", "nvim-undotree", "grug-far" },
 	callback = function(ev)
 		vim.bo[ev.buf].buflisted = false
 		vim.keymap.set("n", "q", "<cmd>close<CR>", { buffer = ev.buf, silent = true })
 	end,
 })
 
--- diagnostics: compact, sorted, rounded floats
+-- Diagnostics: sign + underline on every affected line; the message itself
+-- only on the line the cursor is on. Quiet code, nothing hidden: `gl` shows
+-- the full text, \xx lists everything, the statusline counts them.
 vim.diagnostic.config({
 	severity_sort = true,
-	virtual_text = { prefix = "●", spacing = 2 },
+	underline = true,
+	virtual_text = { current_line = true, prefix = "●", spacing = 2 },
 	float = { border = "rounded", source = true },
 	signs = {
 		text = {
-			[vim.diagnostic.severity.ERROR] = "",
-			[vim.diagnostic.severity.WARN] = "",
-			[vim.diagnostic.severity.INFO] = "",
+			[vim.diagnostic.severity.ERROR] = "",
+			[vim.diagnostic.severity.WARN] = "",
+			[vim.diagnostic.severity.INFO] = "",
 			[vim.diagnostic.severity.HINT] = "󰌵",
 		},
 	},

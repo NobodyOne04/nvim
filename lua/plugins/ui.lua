@@ -1,5 +1,6 @@
--- Look & feel: tokyonight tuned to the archminimal palette (cyan accent,
--- dim chrome), a minimal statusline, buffer tabs, indent guides, scrollbar.
+-- Look & feel: tokyonight tuned to the archminimal palette (cyan accent, dim
+-- chrome), a start screen, a minimal statusline, buffer tabs, indent guides,
+-- scrollbar, and notifications / prompts / pickers in the same style.
 
 local accent = "#00e5ff"
 local danger = "#ff2a6d"
@@ -7,6 +8,33 @@ local mute = "#7d8088"
 local dim = "#4a4c54"
 local faint = "#2e3037"
 local panel = "#18191d"
+local raised = "#1f2026" -- cursor line, folds, sticky context
+local selected = "#1d3a45" -- cyan-tinted selection
+
+-- The OS logo, as in the zsh prompt: Arch on Arch, Apple on macOS.
+local function os_logo()
+	if vim.fn.has("mac") == 1 then return "" end
+	local f = io.open("/etc/os-release")
+	local release = f and f:read("*a") or ""
+	if f then f:close() end
+	return release:find("arch") and "" or ""
+end
+
+-- Start screen header: the Arch logo (all lines one width, so centering
+-- keeps its shape). The wordmark under it is a separate, quieter section.
+local arch_logo = table.concat({
+	[[      /\      ]],
+	[[     /  \     ]],
+	[[    /\   \    ]],
+	[[   /      \   ]],
+	[[  /   ,,   \  ]],
+	[[ /   |  |  -\ ]],
+	[[/_-''    ''-_\]],
+}, "\n")
+
+local function pick(name, opts)
+	return function() require("telescope.builtin")[name](opts) end
+end
 
 return {
 	{
@@ -31,43 +59,164 @@ return {
 					hl.LineNr = { fg = dim }
 					hl.LineNrAbove = { fg = dim }
 					hl.LineNrBelow = { fg = dim }
-					hl.CursorLine = { bg = "#1f2026" }
+					hl.CursorLine = { bg = raised }
 					hl.WinSeparator = { fg = faint }
+					hl.StatusLine = { fg = mute, bg = "NONE" } -- empty bar under the start screen
+					hl.StatusLineNC = { fg = dim, bg = "NONE" }
 					hl.FloatBorder = { fg = dim }
 					hl.FloatTitle = { fg = accent }
 					hl.NormalFloat = { bg = "NONE" }
-					hl.Visual = { bg = "#1d3a45" }
-					hl.Search = { bg = "#1d3a45", fg = accent }
+					hl.Visual = { bg = selected }
+					hl.Search = { bg = selected, fg = accent }
 					hl.IncSearch = { bg = accent, fg = panel }
+					hl.CurSearch = { bg = accent, fg = panel }
 					hl.MatchParen = { fg = accent, bold = true, underline = true }
+					hl.Folded = { bg = raised }
+					hl.FoldColumn = { fg = dim }
 					-- whitespace markers: visible only when you look for them
 					hl.Whitespace = { fg = faint }
 					hl.NonText = { fg = faint }
-					-- completion menu
+					-- LSP: other uses of the word under the cursor
+					hl.LspReferenceText = { bg = "#262830" }
+					hl.LspReferenceRead = { bg = "#262830" }
+					hl.LspReferenceWrite = { bg = "#262830", underline = true, sp = dim }
+					hl.LspInlayHint = { fg = dim, italic = true }
+					-- completion menu (blink.cmp) and the native popup menu
 					hl.Pmenu = { bg = panel, fg = c.fg }
-					hl.PmenuSel = { bg = "#1d3a45", fg = accent }
+					hl.PmenuSel = { bg = selected, fg = accent }
 					hl.PmenuSbar = { bg = panel }
 					hl.PmenuThumb = { bg = dim }
-					hl.CmpItemAbbrMatch = { fg = accent, bold = true }
-					hl.CmpItemAbbrMatchFuzzy = { fg = accent }
+					hl.BlinkCmpMenu = { bg = panel }
+					hl.BlinkCmpMenuBorder = { fg = dim, bg = panel }
+					hl.BlinkCmpMenuSelection = { bg = selected, bold = true }
+					hl.BlinkCmpLabelMatch = { fg = accent, bold = true }
+					hl.BlinkCmpLabelDescription = { fg = mute }
+					hl.BlinkCmpKind = { fg = mute }
+					hl.BlinkCmpDoc = { bg = panel }
+					hl.BlinkCmpDocBorder = { fg = dim, bg = panel }
+					hl.BlinkCmpDocSeparator = { fg = faint, bg = panel }
+					hl.BlinkCmpSignatureHelp = { bg = panel }
+					hl.BlinkCmpSignatureHelpBorder = { fg = dim, bg = panel }
+					hl.BlinkCmpSignatureHelpActiveParameter = { fg = accent, bold = true, underline = true }
 					-- telescope
 					hl.TelescopeBorder = { fg = dim }
 					hl.TelescopePromptBorder = { fg = accent }
 					hl.TelescopePromptPrefix = { fg = accent }
 					hl.TelescopeSelectionCaret = { fg = accent }
-					hl.TelescopeSelection = { bg = "#1d3a45" }
+					hl.TelescopeSelection = { bg = selected }
 					hl.TelescopeMatching = { fg = accent, bold = true }
 					hl.TelescopeTitle = { fg = mute }
+					-- start screen
+					hl.SnacksDashboardHeader = { fg = accent }
+					hl.SnacksDashboardIcon = { fg = accent }
+					hl.SnacksDashboardKey = { fg = accent, bold = true }
+					hl.SnacksDashboardDesc = { fg = c.fg }
+					hl.SnacksDashboardFile = { fg = c.fg }
+					hl.SnacksDashboardDir = { fg = dim }
+					hl.SnacksDashboardTitle = { fg = mute }
+					hl.SnacksDashboardFooter = { fg = dim }
+					hl.SnacksDashboardSpecial = { fg = mute }
+					-- notifications, prompts, pickers
+					hl.SnacksNotifierBorderInfo = { fg = dim }
+					hl.SnacksNotifierTitleInfo = { fg = accent }
+					hl.SnacksNotifierIconInfo = { fg = accent }
+					hl.SnacksNotifierBorderWarn = { fg = dim }
+					hl.SnacksNotifierBorderError = { fg = danger }
+					hl.SnacksNotifierTitleError = { fg = danger }
+					hl.SnacksNotifierIconError = { fg = danger }
+					hl.SnacksInputBorder = { fg = accent }
+					hl.SnacksInputTitle = { fg = accent }
+					hl.SnacksInputIcon = { fg = accent }
+					hl.SnacksPickerBorder = { fg = dim }
+					hl.SnacksPickerTitle = { fg = accent }
+					hl.SnacksPickerMatch = { fg = accent, bold = true }
+					hl.SnacksPickerPrompt = { fg = accent }
+					-- sticky function header (treesitter-context)
+					hl.TreesitterContext = { bg = raised }
+					hl.TreesitterContextLineNumber = { fg = dim, bg = raised }
+					hl.TreesitterContextBottom = { underline = true, sp = faint }
+					-- file browser
+					hl.OilDir = { fg = accent }
+					hl.OilDirIcon = { fg = accent }
 					-- indent guides
 					hl.IblIndent = { fg = faint, nocombine = true }
 					hl.IblScope = { fg = dim, nocombine = true }
 					-- diagnostics accents
 					hl.DiagnosticError = { fg = danger }
 					hl.DiagnosticVirtualTextError = { fg = danger, bg = "NONE" }
+					hl.DiagnosticVirtualLinesError = { fg = danger }
 				end,
 			})
 			vim.cmd.colorscheme("tokyonight")
 		end,
+	},
+
+	-- Start screen, notifications, prompts, and small helpers, one plugin.
+	{
+		"folke/snacks.nvim",
+		lazy = false,
+		priority = 900,
+		keys = {
+			{ "<leader>e", function() Snacks.bufdelete() end, desc = "Delete buffer (keeps the window)" },
+			{ "<leader>gg", function() Snacks.lazygit() end, desc = "Lazygit" },
+			{ "<leader>gl", function() Snacks.lazygit.log_file() end, desc = "Git history of this file" },
+			{ "<leader>n", function() Snacks.notifier.show_history() end, desc = "Notification history" },
+			{ "]]", function() Snacks.words.jump(vim.v.count1) end, desc = "Next use of this word (LSP)" },
+			{ "[[", function() Snacks.words.jump(-vim.v.count1) end, desc = "Previous use of this word (LSP)" },
+		},
+		opts = {
+			bigfile = { enabled = true }, -- huge files open fast (heavy features off)
+			input = { enabled = true }, -- rename & other prompts in a small box at the cursor
+			notifier = { enabled = true, style = "compact", timeout = 3000 },
+			picker = { enabled = true, ui_select = true }, -- code actions & choices in a picker
+			words = { enabled = true }, -- highlight other uses of the word under the cursor
+			lazygit = { configure = true },
+			styles = {
+				input = { relative = "cursor", row = -3, col = 0, width = 44 },
+				notification = { wo = { winblend = 0, wrap = true } },
+			},
+			dashboard = {
+				width = 46,
+				preset = {
+					header = arch_logo,
+					keys = {
+						{ icon = "󰈞 ", key = "f", desc = "find file", action = pick("find_files") },
+						{ icon = "󰊄 ", key = "g", desc = "grep", action = pick("live_grep") },
+						{ icon = "󰋚 ", key = "r", desc = "recent files", action = pick("oldfiles") },
+						{ icon = "󰉋 ", key = "e", desc = "file browser", action = ":Oil" },
+						{ icon = " ", key = "n", desc = "new file", action = ":ene | startinsert" },
+						{ icon = "󰁯 ", key = "s", desc = "restore session", section = "session" },
+						{
+							icon = "󰊢 ",
+							key = "G",
+							desc = "lazygit",
+							action = function() Snacks.lazygit() end,
+							enabled = vim.fn.executable("lazygit") == 1,
+						},
+						{ icon = " ", key = "c", desc = "config", action = pick("find_files", { cwd = vim.fn.stdpath("config") }) },
+						{ icon = "󰒲 ", key = "l", desc = "plugins", action = ":Lazy" },
+						{ icon = "󰗼 ", key = "q", desc = "quit", action = ":qa" },
+					},
+				},
+				sections = {
+					{ section = "header", padding = 1 },
+					{ text = { { "a r c h m i n i m a l", hl = "SnacksDashboardTitle" } }, align = "center", padding = 2 },
+					{ section = "keys", gap = 0, padding = 2 },
+					{ title = "recent", section = "recent_files", limit = 5, indent = 2, padding = 2 },
+					function()
+						local stats = require("lazy.stats").stats()
+						return {
+							align = "center",
+							text = {
+								{ ("%d/%d plugins"):format(stats.loaded, stats.count), hl = "footer" },
+								{ "  ·  ", hl = "footer" },
+								{ ("%d ms"):format(math.floor(stats.startuptime + 0.5)), hl = "footer" },
+							},
+						}
+					end,
+				},
+			},
+		},
 	},
 
 	-- statusline: lowercase, no powerline arrows, one cyan accent
@@ -85,21 +234,58 @@ return {
 				command = { a = { fg = "#e0af68", bg = "NONE", gui = "bold" } },
 				inactive = { a = base, b = base, c = base },
 			}
+			local logo = os_logo()
+			-- `showmode` is off, so this is the only sign that a macro is being recorded
+			local function recording()
+				local reg = vim.fn.reg_recording()
+				return reg ~= "" and ("recording @" .. reg) or ""
+			end
+			local function lsp_names()
+				local names = {}
+				for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
+					names[#names + 1] = client.name
+				end
+				return table.concat(names, " ")
+			end
 			require("lualine").setup({
 				options = {
 					theme = theme,
 					globalstatus = true,
 					component_separators = "",
 					section_separators = "",
+					disabled_filetypes = { statusline = { "snacks_dashboard" } },
 				},
 				sections = {
-					lualine_a = { { "mode", fmt = string.lower } },
-					lualine_b = { { "branch", icon = "" }, "diff" },
-					lualine_c = { { "filename", path = 1, symbols = { modified = " ●", readonly = " " } } },
-					lualine_x = { "diagnostics", { "filetype", colored = false } },
+					lualine_a = {
+						{ function() return logo end, color = { fg = accent }, padding = { left = 1, right = 0 } },
+						{ "mode", fmt = string.lower },
+					},
+					lualine_b = {
+						{ "branch", icon = "" },
+						{ "diff", symbols = { added = "+", modified = "~", removed = "-" } },
+					},
+					lualine_c = {
+						{
+							"filename",
+							path = 1,
+							symbols = { modified = " ●", readonly = " ", unnamed = "[no name]", newfile = "[new]" },
+						},
+					},
+					lualine_x = {
+						{ recording, color = { fg = danger, gui = "bold" } },
+						{ "searchcount", color = { fg = accent } },
+						{ "diagnostics", symbols = { error = " ", warn = " ", info = " ", hint = "󰌵 " } },
+						{ lsp_names, icon = "󰒋", color = { fg = dim } },
+						{ "filetype", colored = false },
+					},
 					lualine_y = { "progress" },
 					lualine_z = { { "location", color = { fg = mute } } },
 				},
+			})
+			-- show / hide the recording marker right away
+			vim.api.nvim_create_autocmd({ "RecordingEnter", "RecordingLeave" }, {
+				group = vim.api.nvim_create_augroup("archminimal-lualine", { clear = true }),
+				callback = function() vim.schedule(function() require("lualine").refresh() end) end,
 			})
 		end,
 	},
@@ -112,7 +298,6 @@ return {
 		keys = {
 			{ "<Tab>", "<Cmd>BufferLineCycleNext<CR>", desc = "Next buffer" },
 			{ "<S-Tab>", "<Cmd>BufferLineCyclePrev<CR>", desc = "Prev buffer" },
-			{ "<leader>e", "<Cmd>bd<CR>", desc = "Delete buffer" },
 		},
 		opts = {
 			options = {
@@ -139,9 +324,10 @@ return {
 		main = "ibl",
 		event = { "BufReadPost", "BufNewFile" },
 		opts = {
-			indent = { char = "│" },
+			indent = { char = "│", tab_char = "│" }, -- tabs (Go, Makefiles) get the same thin guide
 			whitespace = { remove_blankline_trail = false },
 			scope = { enabled = true, show_start = false, show_end = false },
+			exclude = { filetypes = { "snacks_dashboard", "oil" } },
 		},
 	},
 
@@ -154,12 +340,13 @@ return {
 			require("scrollbar").setup({
 				handle = { color = faint },
 				marks = { Search = { color = accent }, Error = { color = danger } },
+				excluded_filetypes = { "snacks_dashboard", "snacks_notif", "snacks_input", "blink-cmp-menu", "oil", "grug-far" },
 			})
 			pcall(function() require("scrollbar.handlers.gitsigns").setup() end)
 		end,
 	},
 
-	-- NEW: git changes in the sign column + hunk actions
+	-- git changes in the sign column + hunk actions
 	{
 		"lewis6991/gitsigns.nvim",
 		event = { "BufReadPre", "BufNewFile" },
@@ -167,8 +354,8 @@ return {
 			signs = {
 				add = { text = "▎" },
 				change = { text = "▎" },
-				delete = { text = "" },
-				topdelete = { text = "" },
+				delete = { text = "" },
+				topdelete = { text = "" },
 				changedelete = { text = "▎" },
 			},
 			on_attach = function(buf)
@@ -191,17 +378,20 @@ return {
 			preset = "helix",
 			spec = {
 				{ "<leader>f", group = "find" },
+				{ "<leader>g", group = "git" },
 				{ "<leader>h", group = "git hunk" },
 				{ "<leader>c", group = "code" },
+				{ "<leader>r", group = "rename / replace" },
 				{ "<leader>s", group = "send to repl" },
 				{ "<leader>x", group = "diagnostics" },
 				{ "<leader>d", group = "debug / db" },
 				{ "<leader>b", group = "buffers / breakpoints" },
+				{ "<leader>q", group = "session" },
 			},
 		},
 	},
 
-	-- NEW: small LSP progress spinner in the corner
+	-- small LSP progress spinner in the corner
 	{
 		"j-hui/fidget.nvim",
 		event = "LspAttach",
@@ -214,5 +404,20 @@ return {
 		dependencies = { "nvim-lua/plenary.nvim" },
 		keys = { { "<leader>td", "<cmd>TodoTelescope<CR>", desc = "Search TODOs" } },
 		opts = {},
+	},
+
+	-- Colors written as #rrggbb get a swatch next to them (handy for theme files),
+	-- in every file type. Neovim 0.12 also colors them through the language
+	-- server (Lua, CSS only); that one is turned off so colors aren't drawn twice.
+	{
+		"nvim-mini/mini.hipatterns",
+		event = { "BufReadPost", "BufNewFile" },
+		config = function()
+			if vim.lsp.document_color then vim.lsp.document_color.enable(false) end
+			local hipatterns = require("mini.hipatterns")
+			hipatterns.setup({
+				highlighters = { hex_color = hipatterns.gen_highlighter.hex_color({ style = "inline", inline_text = "■ " }) },
+			})
+		end,
 	},
 }

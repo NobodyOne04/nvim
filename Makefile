@@ -39,10 +39,12 @@ tools: ## Install CLI tools (ripgrep, fd, tree-sitter, node, go, formatters...)
 	@./scripts/install-tools.sh
 
 sync: ## Install plugins at the exact versions in lazy-lock.json
-	nvim --headless "+Lazy! restore" +qa
+	nvim --headless "+Lazy! restore" "+Lazy! clean" +qa
+	@nvim --headless -c "luafile scripts/blink-fuzzy.lua"
 
 update: ## Update plugins to latest and rewrite lazy-lock.json
 	nvim --headless "+Lazy! sync" +qa
+	@nvim --headless -c "luafile scripts/blink-fuzzy.lua"
 	@git diff --stat lazy-lock.json
 
 lsp: ## Install language servers and goimports with mason

@@ -12,10 +12,10 @@ return {
 	{
 		"mason-org/mason-lspconfig.nvim",
 		event = { "BufReadPre", "BufNewFile" },
-		dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig", "hrsh7th/cmp-nvim-lsp" },
+		dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig", "saghen/blink.cmp" },
 		config = function()
-			-- defaults for every server
-			vim.lsp.config("*", { capabilities = require("cmp_nvim_lsp").default_capabilities() })
+			-- defaults for every server: tell them what the completion menu supports
+			vim.lsp.config("*", { capabilities = require("blink.cmp").get_lsp_capabilities() })
 			vim.lsp.config("lua_ls", {
 				settings = { Lua = { diagnostics = { globals = { "vim" } }, workspace = { checkThirdParty = false } } },
 			})

@@ -17,3 +17,13 @@ map("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlight" })
 map("v", "<", "<gv", { desc = "Indent left, keep selection" })
 map("v", ">", ">gv", { desc = "Indent right, keep selection" })
 map("n", "gl", vim.diagnostic.open_float, { desc = "Line diagnostics" })
+
+-- Undo tree: every earlier state of the file, even across restarts
+-- (undofile is on). Built into Neovim 0.12, no plugin needed.
+map("n", "<leader>u", function()
+	if vim.fn.has("nvim-0.12") == 0 then
+		return vim.notify("the undo tree needs Neovim 0.12+", vim.log.levels.WARN)
+	end
+	vim.cmd.packadd("nvim.undotree")
+	vim.cmd("Undotree")
+end, { desc = "Undo tree" })
