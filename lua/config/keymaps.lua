@@ -27,3 +27,7 @@ map("n", "<leader>u", function()
 	vim.cmd.packadd("nvim.undotree")
 	vim.cmd("Undotree")
 end, { desc = "Undo tree" })
+
+-- Jupyter cells (`# %%` blocks): next / previous. Run keys are under <leader>j.
+map("n", "]j", function() require("config.notebook").jump(1) end, { desc = "Next cell" })
+map("n", "[j", function() require("config.notebook").jump(-1) end, { desc = "Previous cell" })

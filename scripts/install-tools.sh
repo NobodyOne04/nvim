@@ -6,13 +6,15 @@
 #   runtimes:    node/npm, go, python      (mason language servers, Copilot)
 #   formatters:  stylua, black, jq, pg_format  (conform.nvim; gofmt/goimports come with go/mason)
 #   git:         lazygit                   (\gg opens it in a float)
+#   notebooks:   uv, imagemagick           (`make notebook` venv; plots inline via image.nvim)
 set -euo pipefail
 
 if [[ "$OSTYPE" == darwin* ]]; then
     echo "Detected macOS"
     command -v brew >/dev/null || { echo "Error: Homebrew is not installed"; exit 1; }
     brew install neovim ripgrep fd fzf git curl wget unzip \
-        tree-sitter-cli node go python stylua black jq pgformatter lazygit
+        tree-sitter-cli node go python stylua black jq pgformatter lazygit \
+        uv imagemagick
     xcode-select -p >/dev/null 2>&1 || xcode-select --install   # C compiler + make
 
 elif [[ "$OSTYPE" == linux-gnu* ]]; then
@@ -20,19 +22,19 @@ elif [[ "$OSTYPE" == linux-gnu* ]]; then
         echo "Detected Arch Linux"
         sudo pacman -S --needed neovim ripgrep fd fzf git curl wget unzip \
             base-devel tree-sitter-cli nodejs npm go python \
-            stylua python-black jq pgformatter lazygit
+            stylua python-black jq pgformatter lazygit uv imagemagick
 
     elif command -v apt >/dev/null; then
         echo "Detected Debian/Ubuntu"
         sudo apt update
         sudo apt install -y ripgrep fd-find fzf git curl wget unzip \
-            build-essential nodejs npm golang python3 python3-pip black jq pgformatter
-        echo "Note: install Neovim 0.12+, tree-sitter-cli, stylua and lazygit from upstream releases (apt versions are too old or missing)."
+            build-essential nodejs npm golang python3 python3-pip black jq pgformatter imagemagick
+        echo "Note: install Neovim 0.12+, tree-sitter-cli, stylua, lazygit and uv from upstream releases (apt versions are too old or missing)."
 
     elif command -v dnf >/dev/null; then
         echo "Detected Fedora"
         sudo dnf install -y ripgrep fd-find fzf git curl wget unzip \
-            gcc make nodejs npm golang python3 black jq pgformatter neovim tree-sitter-cli
+            gcc make nodejs npm golang python3 black jq pgformatter neovim tree-sitter-cli uv ImageMagick
         echo "Note: install stylua with 'cargo install stylua' and lazygit from its releases if needed."
 
     else

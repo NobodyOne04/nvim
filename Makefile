@@ -2,20 +2,23 @@
 #
 #   make install   tools + link this repo to ~/.config/nvim + plugins + language servers
 #   make update    update plugins and rewrite lazy-lock.json (commit it afterwards)
+#   make notebook  Jupyter support: python host for molten + jupytext
+#   make kernel VENV=path/to/.venv   register a project venv as a Jupyter kernel
 
 SHELL   := /bin/bash
 .DEFAULT_GOAL := help
 
 CONFIG  := $(HOME)/.config/nvim
 STAMP   := $(shell date +%Y%m%d-%H%M%S)
+PYHOST  := $(HOME)/.local/share/nvim/python-host
 SERVERS := pyright lua-language-server bash-language-server typescript-language-server gopls goimports delve
 
-.PHONY: help install link unlink tools sync update lsp check health startup
+.PHONY: help install link unlink tools sync update lsp notebook kernel check health startup
 
 help: ## Show this help
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ {printf "  \033[36m%-9s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-install: tools link sync lsp ## Everything: tools, link, plugins, language servers
+install: tools link sync lsp notebook ## Everything: tools, link, plugins, language servers, notebooks
 
 link: ## Link this repo to ~/.config/nvim (an existing config is moved aside, never deleted)
 	@mkdir -p $(dir $(CONFIG))
@@ -50,6 +53,19 @@ update: ## Update plugins to latest and rewrite lazy-lock.json
 
 lsp: ## Install language servers and goimports with mason
 	MASON_PKGS="$(SERVERS)" nvim --headless -c "luafile scripts/mason-install.lua"
+
+notebook: ## Jupyter: python host for molten (pynvim, jupyter_client) + jupytext CLI
+	uv venv --allow-existing --python 3.12 "$(PYHOST)"
+	uv pip install --python "$(PYHOST)/bin/python" --upgrade pynvim jupyter_client nbformat pillow
+	uv tool install --upgrade jupytext
+	nvim --headless "+Lazy! load molten-nvim" +UpdateRemotePlugins +qa
+	@echo "ok: notebook support installed (register a kernel with: make kernel VENV=path/to/.venv)"
+
+kernel: ## Register a project venv as a Jupyter kernel: make kernel VENV=path/to/.venv [NAME=name]
+	@[ -n "$(VENV)" ] || { echo "usage: make kernel VENV=path/to/.venv [NAME=name]"; exit 1; }
+	uv pip install --python "$(VENV)/bin/python" ipykernel
+	"$(VENV)/bin/python" -m ipykernel install --user \
+		--name "$(or $(NAME),$(notdir $(patsubst %/,%,$(dir $(abspath $(VENV))))))"
 
 check: ## Start headless; show warnings, fail on startup errors
 	@out=$$(nvim --headless "+qa" 2>&1); \
