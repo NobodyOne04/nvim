@@ -12,7 +12,7 @@ if [[ "$OSTYPE" == darwin* ]]; then
     echo "Detected macOS"
     command -v brew >/dev/null || { echo "Error: Homebrew is not installed"; exit 1; }
     brew install neovim ripgrep fd fzf git curl wget unzip \
-        tree-sitter node go python stylua black jq pgformatter lazygit
+        tree-sitter-cli node go python stylua black jq pgformatter lazygit
     xcode-select -p >/dev/null 2>&1 || xcode-select --install   # C compiler + make
 
 elif [[ "$OSTYPE" == linux-gnu* ]]; then

@@ -88,6 +88,7 @@ Press `\` and wait to see every leader key.
 | `\db` | database UI |
 | `\sc` `\sf` `\sl` `\sq` `\cl` | send motion/selection / file / line to the REPL, quit, clear |
 | `\du` `\bp` `F5` `F10` `F11` `F12` | debug UI, breakpoint, continue, step over / into / out |
+| `\dt` `\dl` | Go: debug the test under the cursor / the last one (delve, installed by `make lsp`) |
 | `<C-d>` `<C-u>` | 10 lines down / up and recenter |
 | `<C-h>` `<C-l>` | scroll 10 columns left / right |
 | `<Esc>` | clear search highlight |
@@ -132,7 +133,7 @@ Fixed:
 - mini.nvim moved to the `nvim-mini` GitHub organisation; specs updated (`make sync` switches existing clones).
 
 Tested on Arch (Neovim 0.12.6, upgrade from the previous config with `make sync`, screenshots in kitty) and macOS
-(Neovim 0.11.2).
+(Neovim 0.12.6, linked over an old config, Go checked end to end in a real project).
 
 ## More plugins worth a look (not added)
 

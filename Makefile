@@ -8,7 +8,7 @@ SHELL   := /bin/bash
 
 CONFIG  := $(HOME)/.config/nvim
 STAMP   := $(shell date +%Y%m%d-%H%M%S)
-SERVERS := pyright lua-language-server bash-language-server typescript-language-server gopls goimports
+SERVERS := pyright lua-language-server bash-language-server typescript-language-server gopls goimports delve
 
 .PHONY: help install link unlink tools sync update lsp check health startup
 
@@ -38,9 +38,10 @@ unlink: ## Remove the link and restore the most recent backup
 tools: ## Install CLI tools (ripgrep, fd, tree-sitter, node, go, formatters...)
 	@./scripts/install-tools.sh
 
-sync: ## Install plugins at the exact versions in lazy-lock.json
+sync: ## Install plugins at the exact versions in lazy-lock.json, then compile treesitter parsers
 	nvim --headless "+Lazy! restore" "+Lazy! clean" +qa
 	@nvim --headless -c "luafile scripts/blink-fuzzy.lua"
+	@nvim --headless -c "luafile scripts/ts-install.lua"
 
 update: ## Update plugins to latest and rewrite lazy-lock.json
 	nvim --headless "+Lazy! sync" +qa
