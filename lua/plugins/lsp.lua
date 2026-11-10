@@ -17,7 +17,7 @@ return {
 			-- defaults for every server: tell them what the completion menu supports
 			vim.lsp.config("*", { capabilities = require("blink.cmp").get_lsp_capabilities() })
 			vim.lsp.config("lua_ls", {
-				settings = { Lua = { diagnostics = { globals = { "vim" } }, workspace = { checkThirdParty = false } } },
+				settings = { Lua = { workspace = { checkThirdParty = false } } }, -- `vim` itself comes from lazydev
 			})
 
 			-- installs missing servers and enables every installed one
