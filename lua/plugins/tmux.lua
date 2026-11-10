@@ -12,8 +12,8 @@ return {
 		"mrjones2014/smart-splits.nvim",
 		lazy = false, -- must start with nvim so tmux knows this pane is nvim
 		opts = {
-			at_edge = "stop", -- same as tmux: no wrapping to the other side
-			default_amount = 3,
+			move = { at_edge = "stop" }, -- same as tmux: no wrapping to the other side
+			resize = { amount = 3 },
 		},
 		keys = {
 			{ "<A-h>", ss("move_cursor_left"), desc = "Split / tmux pane left" },

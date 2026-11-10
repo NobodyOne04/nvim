@@ -204,7 +204,7 @@ return {
 	{
 		"folke/snacks.nvim",
 		lazy = false,
-		priority = 900,
+		priority = 1000, -- snacks asks for 1000 (:checkhealth snacks)
 		keys = {
 			{ "<leader>e", function() Snacks.bufdelete() end, desc = "Delete buffer (keeps the window)" },
 			{ "<leader>gg", function() Snacks.lazygit() end, desc = "Lazygit" },

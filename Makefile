@@ -67,11 +67,15 @@ kernel: ## Register a project venv as a Jupyter kernel: make kernel VENV=path/to
 	"$(VENV)/bin/python" -m ipykernel install --user \
 		--name "$(or $(NAME),$(notdir $(patsubst %/,%,$(dir $(abspath $(VENV))))))"
 
-check: ## Start headless; show warnings, fail on startup errors
+check: ## Start headless, then load every plugin and open a file per language; fail on errors
 	@out=$$(nvim --headless "+qa" 2>&1); \
 	[ -n "$$out" ] && echo "$$out"; \
 	if echo "$$out" | grep -qE "E[0-9]+:|[Ee]rror|stack traceback"; then echo "FAIL: startup errors"; exit 1; \
 	else echo "ok: no startup errors"; fi
+	@out=$$(nvim --headless -c "luafile scripts/check.lua" 2>&1); \
+	[ -n "$$out" ] && echo "$$out"; \
+	if echo "$$out" | grep -qE "E[0-9]+:|[Ee]rror|stack traceback"; then echo "FAIL: errors with all plugins loaded"; exit 1; \
+	else echo "ok: all plugins load, no errors opening files"; fi
 
 health: ## Open :checkhealth
 	nvim "+checkhealth"
