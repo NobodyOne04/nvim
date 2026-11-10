@@ -108,7 +108,16 @@ return {
 		opts = { mappings = { start_jumping = "s" } },
 	},
 
-	{ "nvim-mini/mini.ai", event = "VeryLazy", opts = {} },
+	{
+		"nvim-mini/mini.ai",
+		event = "VeryLazy",
+		opts = {
+			custom_textobjects = {
+				-- ij / aj: a Jupyter `# %%` cell (lua/config/notebook.lua)
+				j = function(ai_type) return require("config.notebook").textobject(ai_type) end,
+			},
+		},
+	},
 
 	{ "kylechui/nvim-surround", version = "*", event = "VeryLazy", opts = {} },
 

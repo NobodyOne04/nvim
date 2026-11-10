@@ -11,26 +11,75 @@ local panel = "#18191d"
 local raised = "#1f2026" -- cursor line, folds, sticky context
 local selected = "#1d3a45" -- cyan-tinted selection
 
--- The OS logo, as in the zsh prompt: Arch on Arch, Apple on macOS.
-local function os_logo()
-	if vim.fn.has("mac") == 1 then return "" end
+-- Which OS we're on: "mac", "arch" or "linux" (any other distro).
+local function detect_os()
+	if vim.fn.has("mac") == 1 then return "mac" end
 	local f = io.open("/etc/os-release")
 	local release = f and f:read("*a") or ""
 	if f then f:close() end
-	return release:find("arch") and "" or ""
+	return release:find("arch") and "arch" or "linux"
+end
+local os_name = detect_os()
+
+-- The OS logo, as in the zsh prompt: Arch on Arch, Apple on macOS.
+local function os_logo()
+	return ({ mac = "\u{f179}", arch = "\u{f303}" })[os_name] or "\u{f17c}"
 end
 
--- Start screen header: the Arch logo (all lines one width, so centering
--- keeps its shape). The wordmark under it is a separate, quieter section.
-local arch_logo = table.concat({
-	[[      /\      ]],
-	[[     /  \     ]],
-	[[    /\   \    ]],
-	[[   /      \   ]],
-	[[  /   ,,   \  ]],
-	[[ /   |  |  -\ ]],
-	[[/_-''    ''-_\]],
-}, "\n")
+-- Pad every line to the same width, so centering keeps the art's shape.
+local function art(lines)
+	local w = 0
+	for _, l in ipairs(lines) do w = math.max(w, #l) end
+	for i, l in ipairs(lines) do lines[i] = l .. string.rep(" ", w - #l) end
+	return table.concat(lines, "\n")
+end
+
+-- Start screen header: the logo of the OS we're running on. The wordmark
+-- under it is a separate, quieter section.
+local logos = {
+	arch = art({
+		[[      /\      ]],
+		[[     /  \     ]],
+		[[    /\   \    ]],
+		[[   /      \   ]],
+		[[  /   ,,   \  ]],
+		[[ /   |  |  -\ ]],
+		[[/_-''    ''-_\]],
+	}),
+	mac = art({
+		[[        .:']],
+		[[    __ :'__]],
+		[[ .'`__`-'__``.]],
+		[[:__________.-']],
+		[[:_________:]],
+		[[ :_________`-;]],
+		[[  `.__.-.__.']],
+	}),
+	linux = art({
+		[[    .--.]],
+		[[   |o_o |]],
+		[[   |:_/ |]],
+		[[  //   \ \]],
+		[[ (|     | )]],
+		[[/'\_   _/`\]],
+		[[\___)=(___/]],
+	}),
+}
+local os_header = logos[os_name]
+
+-- Wordmark under the logo: the config name on Arch, the platform elsewhere.
+local function os_wordmark()
+	if os_name == "arch" then return "archminimal" end
+	if os_name == "mac" then
+		return vim.uv.os_uname().machine == "arm64" and "apple silicon" or "intel mac"
+	end
+	local f = io.open("/etc/os-release")
+	local release = f and f:read("*a") or ""
+	if f then f:close() end
+	return (release:match('\nNAME="?([^"\n]+)') or release:match('^NAME="?([^"\n]+)') or "linux"):lower()
+end
+-- Letter-spaced, matching the dashboard's quiet title style.
+local wordmark = os_wordmark():gsub(".", "%0 "):sub(1, -2)
 
 local function pick(name, opts)
 	return function() require("telescope.builtin")[name](opts) end
@@ -178,7 +227,7 @@ return {
 			dashboard = {
 				width = 46,
 				preset = {
-					header = arch_logo,
+					header = os_header,
 					keys = {
 						{ icon = "󰈞 ", key = "f", desc = "find file", action = pick("find_files") },
 						{ icon = "󰊄 ", key = "g", desc = "grep", action = pick("live_grep") },
@@ -200,7 +249,7 @@ return {
 				},
 				sections = {
 					{ section = "header", padding = 1 },
-					{ text = { { "a r c h m i n i m a l", hl = "SnacksDashboardTitle" } }, align = "center", padding = 2 },
+					{ text = { { wordmark, hl = "SnacksDashboardTitle" } }, align = "center", padding = 2 },
 					{ section = "keys", gap = 0, padding = 2 },
 					{ title = "recent", section = "recent_files", limit = 5, indent = 2, padding = 2 },
 					function()
@@ -276,6 +325,7 @@ return {
 						{ "searchcount", color = { fg = accent } },
 						{ "diagnostics", symbols = { error = " ", warn = " ", info = " ", hint = "󰌵 " } },
 						{ lsp_names, icon = "󰒋", color = { fg = dim } },
+						{ function() return vim.b.molten_kernel or "" end, icon = "󰠮", color = { fg = accent } },
 						{ "filetype", colored = false },
 					},
 					lualine_y = { "progress" },
@@ -383,6 +433,7 @@ return {
 				{ "<leader>c", group = "code" },
 				{ "<leader>r", group = "rename / replace" },
 				{ "<leader>s", group = "send to repl" },
+				{ "<leader>j", group = "jupyter" },
 				{ "<leader>x", group = "diagnostics" },
 				{ "<leader>d", group = "debug / db" },
 				{ "<leader>b", group = "buffers / breakpoints" },

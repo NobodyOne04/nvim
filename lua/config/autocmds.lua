@@ -13,6 +13,15 @@ au("BufReadPost", {
 	end,
 })
 
+-- reload files changed outside Neovim (git, formatters, Claude Code in the next pane);
+-- unsaved buffers are never overwritten, 'autoread' only reloads clean ones
+au({ "FocusGained", "BufEnter", "CursorHold", "TermLeave" }, {
+	group = group,
+	callback = function()
+		if vim.fn.getcmdwintype() == "" and vim.bo.buftype == "" then vim.cmd("silent! checktime") end
+	end,
+})
+
 -- keep splits even when the terminal is resized
 au("VimResized", { group = group, command = "tabdo wincmd =" })
 

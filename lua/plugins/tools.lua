@@ -71,4 +71,16 @@ return {
 			dap.listeners.before.event_terminated["dapui"] = function() dapui.close() end
 		end,
 	},
+
+	-- Go debugging through delve (installed by `make lsp`). F5 picks "Debug", "Debug test", ...
+	{
+		"leoluz/nvim-dap-go",
+		ft = "go",
+		dependencies = { "mfussenegger/nvim-dap" },
+		keys = {
+			{ "<leader>dt", function() require("dap-go").debug_test() end, ft = "go", desc = "Debug Go test under cursor" },
+			{ "<leader>dl", function() require("dap-go").debug_last_test() end, ft = "go", desc = "Debug last Go test" },
+		},
+		opts = {},
+	},
 }

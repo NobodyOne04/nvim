@@ -65,9 +65,16 @@ opt.virtualedit = "block"       -- block selections can go past the end of short
 opt.updatetime = 100
 opt.timeoutlen = 400
 
--- No plugin here needs Neovim's remote-plugin providers; probing Python alone
--- cost ~480 ms every time a .py file was opened.
-vim.g.loaded_python3_provider = 0
+-- Python is needed only by molten (Jupyter, see lua/plugins/notebook.lua).
+-- It gets its own venv from `make notebook`; pointing Neovim straight at it
+-- skips the PATH search that cost ~480 ms every time a .py file was opened.
+-- Without that venv the provider stays off.
+local python_host = vim.fn.stdpath("data") .. "/python-host/bin/python"
+if vim.uv.fs_stat(python_host) then
+	vim.g.python3_host_prog = python_host
+else
+	vim.g.loaded_python3_provider = 0
+end
 vim.g.loaded_ruby_provider = 0
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_node_provider = 0

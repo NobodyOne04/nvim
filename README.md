@@ -24,6 +24,7 @@ make install
 | `make link` | links this repo to `~/.config/nvim`; an existing config is moved to `~/.config/nvim.bak-<date>`, never deleted |
 | `make sync` | installs plugins at the versions in `lazy-lock.json`, removes plugins the config no longer uses, fetches blink.cmp's fuzzy matcher |
 | `make lsp` | installs pyright, lua_ls, bashls, ts_ls, gopls and goimports with mason |
+| `make notebook` | Jupyter support: a Python venv for molten at `~/.local/share/nvim/python-host` (pynvim, jupyter_client) and the `jupytext` CLI (`uv tool`) |
 
 Updating an existing install: `git pull && make sync`.
 
@@ -41,6 +42,7 @@ lua/config/options.lua    editor options (folds, whitespace markers, splits)
 lua/config/keymaps.lua    general keymaps, undo tree
 lua/config/autocmds.lua   restore cursor, active-window cursor line, q closes helpers, diagnostics style
 lua/config/lazy.lua       lazy.nvim bootstrap
+lua/config/notebook.lua   Jupyter cells: find / run / jump / new cell, kernel picking
 lua/plugins/ui.lua        theme, start screen + notifications + prompts (snacks), statusline, bufferline,
                           indent guides, scrollbar, gitsigns, which-key, color swatches
 lua/plugins/editor.lua    telescope, oil, yanky, jump2d, surround, autopairs, guess-indent, multi-cursor,
@@ -49,6 +51,7 @@ lua/plugins/coding.lua    completion (blink.cmp), lazydev, Copilot
 lua/plugins/lsp.lua       mason, servers, LSP keymaps, goto-preview, formatting
 lua/plugins/treesitter.lua parsers, syntax folds, sticky function header
 lua/plugins/tools.lua     dadbod, iron, distant, dap
+lua/plugins/notebook.lua  Jupyter: jupytext, molten, image.nvim
 scripts/                  install-tools.sh, mason-install.lua, blink-fuzzy.lua
 ```
 
@@ -87,12 +90,54 @@ Press `\` and wait to see every leader key.
 | `]h` `[h` `\hp` `\hs` `\hr` `\hb` | next/prev git hunk, preview, stage, reset, blame |
 | `\db` | database UI |
 | `\sc` `\sf` `\sl` `\sq` `\cl` | send motion/selection / file / line to the REPL, quit, clear |
+| `]j` `[j` `\j…` `ij` `aj` | Jupyter cells: next / previous, run and more (see [Jupyter notebooks](#jupyter-notebooks)), select a cell |
 | `\du` `\bp` `F5` `F10` `F11` `F12` | debug UI, breakpoint, continue, step over / into / out |
+| `\dt` `\dl` | Go: debug the test under the cursor / the last one (delve, installed by `make lsp`) |
 | `<C-d>` `<C-u>` | 10 lines down / up and recenter |
 | `<C-h>` `<C-l>` | scroll 10 columns left / right |
 | `<Esc>` | clear search highlight |
 | completion | `<C-n>` `<C-p>` select, `<CR>` confirm, `<C-Space>` open / docs, `<C-e>` close, `<C-b>` `<C-f>` scroll docs, `<C-l>` `<C-h>` jump in snippets, `<C-k>` signature |
 | Copilot | `<Tab>` accepts |
+
+## Jupyter notebooks
+
+`nvim notebook.ipynb` opens the notebook as a Python script: each cell starts
+with a `# %%` line (`# %% [markdown]` for text cells). Completion, pyright and
+formatting work as in any `.py` file. `:w` writes the changes back into the `.ipynb`
+and keeps its outputs, including the ones you just ran.
+
+Code runs in a real Jupyter kernel (molten). Output appears under each cell, and
+plots are drawn in the terminal (Ghostty / kitty graphics). The kernel starts by
+itself when you open a notebook: the one it was saved with, otherwise the one
+registered for the project's `.venv`. With neither, `\ji` lets you pick. The keys
+work in plain `.py` files too: a file without `# %%` lines is one cell. The
+statusline shows the kernel.
+
+One-time setup:
+
+```sh
+make notebook                            # python host for molten + jupytext
+make kernel VENV=~/projects/foo/.venv    # per project: ipykernel + register it as "foo"
+```
+
+| Keys | Action |
+|---|---|
+| `]j` `[j` | next / previous cell |
+| `ij` `aj` | the cell's code / the whole cell (`vij`, `yaj`, `daj`...) |
+| `\jr` / `\jn` | run cell / run cell and go to the next one (adds one at the end) |
+| `\ja` `\jA` `\jb` | run all / everything up to here / from here down |
+| `\jl` / `\jr` (visual) | run line / selection |
+| `\jc` / `\jm` | new code / markdown cell below |
+| `\jo` / `\jh` | open the output in a float and enter it (scroll long output) / hide it |
+| `\jd` / `\jD` | delete this cell's output / all outputs |
+| `\jx` / `\jR` | interrupt / restart the kernel (clears outputs) |
+| `\jp` | open the plot in the system image viewer |
+| `\ji` | start a kernel (or attach another one) |
+
+Notes: while a notebook is open, jupytext keeps a `notebook.py` next to it and
+deletes it when you close the buffer. If a `notebook.py` already exists, it is
+used as the notebook's text and left in place. In tmux, images need `set -g
+allow-passthrough on`.
 
 ## Design pass (November 2026)
 
@@ -132,7 +177,7 @@ Fixed:
 - mini.nvim moved to the `nvim-mini` GitHub organisation; specs updated (`make sync` switches existing clones).
 
 Tested on Arch (Neovim 0.12.6, upgrade from the previous config with `make sync`, screenshots in kitty) and macOS
-(Neovim 0.11.2).
+(Neovim 0.12.6, linked over an old config, Go checked end to end in a real project).
 
 ## More plugins worth a look (not added)
 
