@@ -16,3 +16,4 @@ Decisions behind this config. Format and statuses: [0001](0001-record-decisions-
 | [0010](0010-tmux-navigation-with-smart-splits.adr) | Alt-h/j/k/l moves across nvim splits and tmux panes (smart-splits) | Accepted |
 | [0011](0011-headless-make-check.adr) | Test the config with a headless make check that captures vim.notify | Accepted |
 | [0012](0012-adr-files-in-the-editor.adr) | ADR files in the editor: markdown look, Proposed-only status changes | Accepted |
+| [0013](0013-claude-code-in-the-editor.adr) | Claude Code in the editor: claudecode.nvim next to Copilot | Accepted |

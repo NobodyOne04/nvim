@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Claude Code in nvim (claudecode.nvim): `\a` keys to send code, review its diffs; `\ai` toggles Copilot hints
 - ADR files: `gd` on a link opens the ADR it points to, `gpd` peeks it in a float
 - ADR files (`.adr`) get a green gavel icon in the file browser, picker and buffer tabs
 - Decision records in `docs/adr/`: twelve ADRs for the config's existing decisions

@@ -454,6 +454,7 @@ return {
 				{ "<leader>d", group = "debug / db" },
 				{ "<leader>b", group = "buffers / breakpoints" },
 				{ "<leader>q", group = "session" },
+				{ "<leader>a", group = "ai" },
 				{ "<leader>A", group = "adr" },
 			},
 		},
