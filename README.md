@@ -92,7 +92,7 @@ Press `\` and wait to see every leader key.
 | `\sc` `\sf` `\sl` `\sq` `\cl` | send motion/selection / file / line to the REPL, quit, clear |
 | `]j` `[j` `\j…` `ij` `aj` | Jupyter cells: next / previous, run and more (see [Jupyter notebooks](#jupyter-notebooks)), select a cell |
 | `\Af` | **ADRs** (`.adr`, opened as markdown): pick one, showing status and title |
-| `]A` `[A` `\Aa` `\Ar` `\Ad` `\As` | in an ADR: next / previous ADR; set status to Accepted / Rejected / Deprecated / Superseded (asks which ADR replaces it, links both). Only a **Proposed** ADR can change |
+| `gd` `]A` `[A` `\Aa` `\Ar` `\Ad` `\As` | in an ADR: open the linked ADR under the cursor; next / previous ADR; set status to Accepted / Rejected / Deprecated / Superseded (asks which ADR replaces it, links both). Only a **Proposed** ADR can change |
 | `\du` `\bp` `F5` `F10` `F11` `F12` | debug UI, breakpoint, continue, step over / into / out |
 | `\dt` `\dl` | Go: debug the test under the cursor / the last one (delve, installed by `make lsp`) |
 | `<C-d>` `<C-u>` | 10 lines down / up and recenter |

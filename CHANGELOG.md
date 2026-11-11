@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- ADR files: `gd` on a link opens the ADR it points to
 - ADR files (`.adr`) get a green gavel icon in the file browser, picker and buffer tabs
 - Decision records in `docs/adr/`: twelve ADRs for the config's existing decisions
 - ADR files (`.adr`): markdown highlighting, a picker, `]A`/`[A` between them, keys to decide a Proposed ADR, coloured status

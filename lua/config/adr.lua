@@ -138,8 +138,22 @@ function M.set_status(status)
 	end)
 end
 
+-- gd: open the target of the [text](path) link under the cursor, path relative to this file
+function M.follow()
+	local line, col = vim.api.nvim_get_current_line(), vim.api.nvim_win_get_cursor(0)[2] + 1
+	for s, path, e in line:gmatch("()%[[^%]]*%]%(([^)%s#]+)[^)]*%)()") do
+		if col >= s and col < e then
+			local file = vim.fs.normalize(vim.fs.joinpath(vim.fn.expand("%:p:h"), path))
+			if vim.uv.fs_stat(file) then return vim.cmd.edit(vim.fn.fnameescape(file)) end
+			return notify("no such file: " .. path, vim.log.levels.WARN)
+		end
+	end
+	notify("no link under the cursor")
+end
+
 function M.attach(buf)
 	local map = function(lhs, fn, desc) vim.keymap.set("n", lhs, fn, { buffer = buf, desc = desc }) end
+	map("gd", M.follow, "Go to linked ADR")
 	map("]A", function() M.jump(1) end, "Next ADR")
 	map("[A", function() M.jump(-1) end, "Previous ADR")
 	map("<leader>Aa", function() M.set_status("Accepted") end, "Accept")
