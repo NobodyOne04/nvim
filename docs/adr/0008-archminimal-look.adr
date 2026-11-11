@@ -1,0 +1,25 @@
+# 0008. Look: tokyonight tuned to the archminimal palette
+
+- Status: Accepted
+- Date: 2026-11-07
+
+## Context
+The editor should look like the rest of the archminimal desktop (zsh prompt, tmux, terminal).
+
+## Decision
+tokyonight (moon) with overrides in `on_highlights`: one cyan accent `#00e5ff`, transparent
+backgrounds, rounded borders, dim chrome. Palette values are locals at the top of
+`lua/plugins/ui.lua` and are reused; a new plugin's highlights go in `on_highlights`.
+The start screen and statusline show the running OS's logo, as the zsh prompt does.
+
+## Alternatives
+Not recorded at the time.
+
+## Rationale
+One accent and quiet chrome keep attention on the code and match the desktop.
+
+## Consequences
+- New UI must reuse the palette locals instead of introducing colours.
+
+## References
+- `lua/plugins/ui.lua`, README "Design pass", commit `3f6575f`

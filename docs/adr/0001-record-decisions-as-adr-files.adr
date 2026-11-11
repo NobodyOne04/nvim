@@ -1,0 +1,28 @@
+# 0001. Record architecture decisions as .adr files
+
+- Status: Accepted
+- Date: 2026-11-11
+
+## Context
+The config's decisions lived in commit messages, README "review" sections and code comments.
+A future reader (or Claude) had to dig through history to learn why things are the way they are.
+
+## Decision
+Record decisions with long-term consequences as ADRs in `docs/adr/NNNN-short-title.adr`:
+sequential four-digit numbers, never reused, markdown content, the `.adr` extension so they are
+told apart from other docs. `docs/adr/README.md` is the index. Earlier decisions (0002–0012) are
+recorded retroactively from the repo's history.
+
+## Alternatives
+- Keep decisions in README sections: mixed with usage docs, no status or supersession.
+- `.md` extension: works everywhere, but ADRs can't be told apart from other markdown.
+
+## Rationale
+One place, one format, with a status that shows whether a decision still holds.
+
+## Consequences
+- Commits carry `[ADR-NNNN]` tags (`commit-style`).
+- `.adr` needs editor support: see [0012](0012-adr-files-in-the-editor.adr).
+
+## References
+- `adr-manager` skill

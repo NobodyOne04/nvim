@@ -1,0 +1,25 @@
+# 0011. Test the config with a headless make check that captures vim.notify
+
+- Status: Accepted
+- Date: 2026-11-11
+
+## Context
+lazy.nvim and plugins report errors through `vim.notify`, which prints nothing with `--headless`.
+A plain `nvim --headless +qa` passed with a broken lazy-loaded plugin.
+
+## Decision
+`make check` runs (1) a plain headless start, then (2) `scripts/check.lua`, which captures
+`vim.notify`, loads every plugin and opens one file per language. Any error fails it.
+`make startup` times five starts against the budget in [0002](0002-lazy-nvim-pinned-and-lazy-loaded.adr).
+
+## Alternatives
+- Plain headless start: misses errors, as above.
+
+## Rationale
+Catches broken plugins before they reach `main` and every machine.
+
+## Consequences
+- New languages or plugins should be covered by `scripts/check.lua`.
+
+## References
+- `Makefile`, `scripts/check.lua`, PR #2
