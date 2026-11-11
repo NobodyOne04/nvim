@@ -3,29 +3,36 @@
 - Status: Accepted
 - Date: 2026-11-11
 
-## Context
-ADRs use the `.adr` extension ([0001](0001-record-decisions-as-adr-files.adr)). Neovim opened
-them as plain text, with no way to browse them or record a decision.
+`.adr` files open as Markdown, with a picker, navigation and status keys from a small
+in-repo module that only lets Proposed ADRs change status.
 
-## Decision
-- `.adr` is detected as the `markdown` filetype, so highlighting, rendering, LSP and formatting
-  are the same as `.md`.
-- A small in-repo module, `lua/config/adr.lua`: `\Af` picker (status + title), `]A`/`[A`
-  between ADRs, `\Aa` `\Ar` `\Ad` `\As` set Accepted / Rejected / Deprecated / Superseded.
-- Only a **Proposed** ADR can change status; decided ADRs are history and are refused.
-  Superseded links both ADRs. The Date line becomes the decision date.
+## Technical details
+- **Problem**: ADRs use the `.adr` extension ([0001](0001-record-decisions-as-adr-files.adr));
+  Neovim opened them as plain text, with no way to browse them or record a decision.
+- **Filetype**: `vim.filetype.add({ extension = { adr = "markdown" } })` in
+  `lua/config/options.lua`, so highlighting, rendering, LSP and formatting match `.md`.
+- **Module** `lua/config/adr.lua` (~150 lines), attached by a `BufReadPost`/`BufNewFile`
+  autocmd on `*.adr` in `autocmds.lua`:
+  - `M.list()`: every `.adr` via `git ls-files -co --exclude-standard -- '*.adr'` from the
+    repo root (outside git: the current folder), sorted by name = number.
+  - `\Af` (global, `keymaps.lua`): `Snacks.picker` of status + title with file preview,
+    reading the first 40 lines of each file.
+  - `]A`/`[A` (buffer-local): next/previous ADR by number.
+  - `M.decorate()`: colours the status word (`AdrProposed`, `AdrAccepted`, ... in
+    `on_highlights`: open in the accent, decided ones quieter).
+  - `\Aa` / `\Ar` / `\Ad` / `\As`: set Accepted / Rejected / Deprecated / Superseded. Only
+    when the current status is `Proposed`; otherwise a warning and nothing changes. The
+    `- Date:` line becomes today. Superseded asks for the replacing ADR, writes
+    `Superseded by [NNNN](file)` and adds `- Supersedes:` after the other ADR's Date line,
+    leaving its status untouched.
+- **UI**: which-key group `\A` = "adr"; nvim-web-devicons gives `.adr` a green gavel
+  (`#c3e88d`), matching eza in the zsh repo.
+- **Consequences**: least code for full Markdown support plus the ADR workflow, synced with
+  the config. `]A`/`[A` hide Neovim's arglist `:last`/`:rewind` inside `.adr` buffers. The
+  picker needs git to see the whole repo.
 
-## Alternatives
-- A separate plugin repo: a second project and lockfile entry for ~150 lines; can be split out
-  later if others want it.
-- A custom `adr` filetype: every markdown plugin would need registering again.
-
-## Rationale
-Least code that gives full markdown support plus the ADR workflow, synced with the config.
-
-## Consequences
-- `]A`/`[A` hide Neovim's arglist `:last`/`:rewind` inside `.adr` buffers.
-- The picker finds ADRs through `git ls-files`.
-
-## References
-- `lua/config/adr.lua`, PR #3
+## Technologies and alternatives
+- Involved: snacks.nvim picker, which-key, nvim-web-devicons, git.
+- Alternatives: a separate plugin repo: a second project and lockfile entry for ~150 lines
+  (can be split out later); a custom `adr` filetype: every markdown plugin would need
+  registering again.

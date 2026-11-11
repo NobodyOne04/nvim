@@ -3,23 +3,29 @@
 - Status: Accepted
 - Date: 2026-11-07
 
-## Context
-The editor should look like the rest of the archminimal desktop (zsh prompt, tmux, terminal).
+The editor uses tokyonight moon, overridden to the archminimal palette: one cyan accent,
+transparent backgrounds, rounded borders, quiet chrome.
 
-## Decision
-tokyonight (moon) with overrides in `on_highlights`: one cyan accent `#00e5ff`, transparent
-backgrounds, rounded borders, dim chrome. Palette values are locals at the top of
-`lua/plugins/ui.lua` and are reused; a new plugin's highlights go in `on_highlights`.
-The start screen and statusline show the running OS's logo, as the zsh prompt does.
+## Technical details
+- **Problem**: the editor should look like the rest of the archminimal desktop (zsh prompt,
+  tmux, terminal) instead of a stock theme.
+- **Palette** (locals at the top of `lua/plugins/ui.lua`, reused everywhere): `accent`
+  `#00e5ff`, `danger` `#ff2a6d`, `mute` `#7d8088`, `dim` `#4a4c54`, `faint` `#2e3037`,
+  `panel` `#18191d`, `raised` `#1f2026` (cursor line, folds, sticky context), `selected`
+  `#1d3a45` (cyan-tinted selection).
+- **Theme**: `folke/tokyonight.nvim`, `lazy = false`, `priority = 1000`; `style = "moon"`,
+  `transparent = true` (the terminal background shows through), sidebars and floats
+  transparent, italic comments, bold keywords. Every override, including highlights for
+  other plugins (ADR status words, completion menu, pickers), lives in `on_highlights`.
+- **Borders**: `rounded` everywhere (lazy UI, LSP floats, diagnostics, blink menus, mason,
+  goto-preview).
+- **OS logo**: start screen and statusline show the running OS's logo, as the zsh prompt
+  does: Arch logo in the accent cyan on Arch, Apple on macOS, Tux elsewhere (`detect_os`).
+  `.adr` files get a green gavel icon (`#c3e88d`) via nvim-web-devicons.
+- **Rule**: new UI reuses the palette locals; a new plugin's highlights go in
+  `on_highlights`, no new colours.
+- **Consequences**: one accent and quiet chrome keep attention on the code and match the
+  desktop; every new plugin needs its highlights mapped.
 
-## Alternatives
-Not recorded at the time.
-
-## Rationale
-One accent and quiet chrome keep attention on the code and match the desktop.
-
-## Consequences
-- New UI must reuse the palette locals instead of introducing colours.
-
-## References
-- `lua/plugins/ui.lua`, README "Design pass", commit `3f6575f`
+## Technologies and alternatives
+- Involved: tokyonight.nvim, nvim-web-devicons, a Nerd Font.

@@ -3,28 +3,36 @@
 - Status: Accepted
 - Date: 2026-11-05
 
-## Context
-Before, LSP keymaps were attached to four named servers only (gopls got none), completion
-capabilities were configured twice, and formatting (formatter.nvim on `\f`) waited a full timeout
-because of a key clash.
+mason installs language servers, Neovim's native `vim.lsp.config` configures them, one
+`LspAttach` handler gives every server the same keys, and conform.nvim formats.
 
-## Decision
-- mason installs the servers; `mason-lspconfig` enables every installed one; defaults go through
-  `vim.lsp.config("*", …)`.
-- LSP keymaps come from one `LspAttach` handler, so every server gets them.
-- The server list lives in `lua/plugins/lsp.lua` `servers` **and** the `Makefile` `SERVERS`; both
-  are kept in sync. `make lsp` installs them headless.
-- Formatting is conform.nvim (`\cf`, `:Format`), tools installed by `scripts/install-tools.sh`.
+## Technical details
+- **Problem**: LSP keymaps were attached to four named servers only (gopls got none),
+  completion capabilities were configured twice, and formatting (formatter.nvim on `\f`)
+  waited a full timeout because `\f` clashed with `\fb`/`\fh`/`\fg`.
+- **Servers** (`lua/plugins/lsp.lua`): `servers = { "pyright", "ts_ls", "lua_ls", "bashls",
+  "gopls" }`. `mason-lspconfig` (on `BufReadPre`/`BufNewFile`) runs with
+  `ensure_installed = servers, automatic_enable = true`, so every installed server starts.
+- **Defaults**: `vim.lsp.config("*", { capabilities = require("blink.cmp").get_lsp_capabilities() })`
+  ([0006](0006-blink-cmp-for-completion.adr)); `lua_ls` sets `checkThirdParty = false`, the
+  Neovim API types come from lazydev.nvim.
+- **Keys**: one `LspAttach` autocmd (group `archminimal-lsp`) maps buffer-local `gd`, `gD`,
+  `K`, `\rn` (rename), `\ca` (code action), `\ch` (toggle inlay hints) for any server.
+  goto-preview adds `gpd`/`gpi`/`gpr`/`gP` floats.
+- **Install headless**: `make lsp` runs `scripts/mason-install.lua` with
+  `MASON_PKGS="$(SERVERS)"` (`pyright lua-language-server bash-language-server
+  typescript-language-server gopls goimports delve`). It drives mason's registry API
+  directly, waits for every package (30 min cap) and exits non-zero on failure, because
+  headless `:MasonInstall` treats any installer stderr (e.g. Go's "downloading") as an error.
+- **Formatting**: conform.nvim on `\cf` (normal and visual) and `:Format` (range aware), async
+  with `lsp_format = "fallback"`. `formatters_by_ft`: python `black`, lua `stylua`, go
+  `goimports` + `gofmt`, json `jq`, sql `pg_format`; tools from `scripts/install-tools.sh`.
+- **Consequences**: a new server only needs adding to the list; it gets keys, completion and
+  installation for free. Two lists must stay in sync: `servers` in `lsp.lua` and `SERVERS`
+  in the `Makefile` (mason package names differ from lspconfig names).
 
-## Alternatives
-- formatter.nvim: replaced by conform (same tools, async).
-- Per-server keymaps: missed servers, as gopls showed.
-
-## Rationale
-A new server only needs adding to the list; it gets keys, completion and installation for free.
-
-## Consequences
-- Two lists to keep in sync (`lsp.lua` and `Makefile`).
-
-## References
-- `lua/plugins/lsp.lua`, `Makefile`, README "Earlier review"
+## Technologies and alternatives
+- Involved: Neovim 0.11+ `vim.lsp.config`, mason.nvim, mason-lspconfig.nvim,
+  nvim-lspconfig, conform.nvim, goto-preview.
+- Alternatives: formatter.nvim: replaced by conform (same tools, async); per-server keymaps:
+  servers get missed, as gopls showed.
