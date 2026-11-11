@@ -274,6 +274,13 @@ return {
 		},
 	},
 
+	-- file icons; ADRs get a gavel in tokyonight's green, same glyph and colour as eza in the zsh repo
+	{
+		"nvim-tree/nvim-web-devicons",
+		lazy = true,
+		opts = { override_by_extension = { adr = { icon = "󰊛", color = "#c3e88d", name = "Adr" } } },
+	},
+
 	-- statusline: lowercase, no powerline arrows, one cyan accent
 	{
 		"nvim-lualine/lualine.nvim",

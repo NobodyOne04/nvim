@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- ADR files (`.adr`) get a green gavel icon in the file browser, picker and buffer tabs
 - Decision records in `docs/adr/`: twelve ADRs for the config's existing decisions
 - ADR files (`.adr`): markdown highlighting, a picker, `]A`/`[A` between them, keys to decide a Proposed ADR, coloured status
 - `make check` loads every plugin and opens a file per language; plugin errors fail it
