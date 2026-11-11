@@ -15,6 +15,7 @@ keys, notebooks, past reviews); this file is for you.
 | autocmds, diagnostics look | `lua/config/autocmds.lua` |
 | lazy.nvim bootstrap/setup | `lua/config/lazy.lua` |
 | Jupyter cell helpers (`# %%`) | `lua/config/notebook.lua` |
+| ADR files (`.adr`: picker, status keys) | `lua/config/adr.lua`, wired in `autocmds.lua` |
 | plugin specs, by theme | `lua/plugins/{core,editor,coding,lsp,treesitter,ui,tools,notebook,tmux}.lua` |
 | colours, start screen, statusline | `lua/plugins/ui.lua` (palette locals at the top; `on_highlights`) |
 | language server list | `lua/plugins/lsp.lua` `servers` **and** `Makefile` `SERVERS` (keep both in sync) |

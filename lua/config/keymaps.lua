@@ -31,3 +31,6 @@ end, { desc = "Undo tree" })
 -- Jupyter cells (`# %%` blocks): next / previous. Run keys are under <leader>j.
 map("n", "]j", function() require("config.notebook").jump(1) end, { desc = "Next cell" })
 map("n", "[j", function() require("config.notebook").jump(-1) end, { desc = "Previous cell" })
+
+-- ADRs: pick any .adr in the repo. Status keys exist only inside an ADR (config/adr.lua).
+map("n", "<leader>Af", function() require("config.adr").pick() end, { desc = "Find ADR" })

@@ -67,3 +67,10 @@ vim.diagnostic.config({
 		},
 	},
 })
+
+-- ADR buffers: status keys under <leader>A, ]A/[A between ADRs, coloured status
+au({ "BufReadPost", "BufNewFile" }, {
+	group = group,
+	pattern = "*.adr",
+	callback = function(ev) require("config.adr").attach(ev.buf) end,
+})

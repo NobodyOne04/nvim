@@ -121,6 +121,12 @@ return {
 					hl.CurSearch = { bg = accent, fg = panel }
 					hl.MatchParen = { fg = accent, bold = true, underline = true }
 					hl.Folded = { bg = raised }
+					-- ADR status word (config/adr.lua): open in the accent, decided ones quieter
+					hl.AdrProposed = { fg = accent, bold = true }
+					hl.AdrAccepted = { fg = c.green, bold = true }
+					hl.AdrRejected = { fg = danger }
+					hl.AdrDeprecated = { fg = mute, italic = true }
+					hl.AdrSuperseded = { fg = mute, italic = true }
 					hl.FoldColumn = { fg = dim }
 					-- whitespace markers: visible only when you look for them
 					hl.Whitespace = { fg = faint }
@@ -438,6 +444,7 @@ return {
 				{ "<leader>d", group = "debug / db" },
 				{ "<leader>b", group = "buffers / breakpoints" },
 				{ "<leader>q", group = "session" },
+				{ "<leader>A", group = "adr" },
 			},
 		},
 	},
