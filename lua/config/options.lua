@@ -82,3 +82,6 @@ vim.g.loaded_node_provider = 0
 -- Not enabled: Neovim 0.12's experimental message UI (`require("vim._core.ui2")
 -- .enable({})`). It removes "Press ENTER" prompts, but in testing it dropped
 -- keystrokes typed while plugin messages arrived. Revisit when it's stable.
+
+-- ADRs (docs/adr/NNNN-title.adr) are markdown: same highlighting, LSP and formatting
+vim.filetype.add({ extension = { adr = "markdown" } })

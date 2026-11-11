@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- ADR files (`.adr`): markdown highlighting, a picker, `]A`/`[A` between them, keys to decide a Proposed ADR, coloured status
 - `make check` loads every plugin and opens a file per language; plugin errors fail it
 - `CLAUDE.md`: how to work on this repo with Claude Code
 - Go debugging (delve), reload of files changed outside nvim (#1)
