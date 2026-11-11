@@ -1,0 +1,37 @@
+# 0013. Claude Code in the editor: claudecode.nvim next to Copilot
+
+- Status: Accepted
+- Date: 2026-11-11
+
+Claude Code connects to Neovim through `coder/claudecode.nvim` for chat, code generation
+and reviewed diffs; Copilot stays for inline hints as you type. All AI keys sit under
+`\a`.
+
+## Technical details
+- **Problem**: Claude Code ran in a tmux pane with no link to nvim. It couldn't see the
+  open file or selection, its edits landed on disk unreviewed, and there were no keys for
+  AI at all except `<Tab>` (accept Copilot).
+- **Plugin** (`lua/plugins/coding.lua`): `coder/claudecode.nvim`, the same IDE protocol
+  the VS Code extension uses (a websocket server plus a lock file in `~/.claude/ide/`).
+  Lazy-loaded on its commands and keys, so startup doesn't change; the server starts when
+  the plugin loads. Terminal: snacks split on the right (snacks is already installed).
+  A `claude` already running in a tmux pane can attach to the same server with `/ide`.
+  `focus_after_send = true`: after sending code you type the request straight away.
+- **Keys** (`\a` = "ai" in which-key; `\A` stays "adr"):
+  - `\ac` toggle Claude, `\af` focus it, `\ar` resume a session, `\am` pick model.
+  - `\ab` add the current buffer as context; `\as` (visual) send the selection: this is
+    code generation (select, send, say "write the tests" / "refactor this").
+    In oil, `\as` adds the file under the cursor.
+  - `\aa` / `\ad` accept / reject the diff Claude proposes.
+  - `\ai` toggle Copilot inline hints on and off (`:Copilot enable/disable`).
+  - Insert mode: `<M-]>` / `<M-[>` cycle Copilot suggestions (copilot.vim defaults).
+    `<M-\>` (copilot's "suggest now") is taken by tmux (split right), so it's left alone.
+- **Consequences**: one place for AI keys, edits show up as diffs you accept. Two AI
+  tools stay installed: Claude has no ghost-text completion. The Claude terminal inside
+  nvim and the tmux pane are two ways to do the same thing; pick per session.
+
+## Technologies and alternatives
+- Involved: claudecode.nvim, snacks.nvim terminal, copilot.vim, which-key.
+- Alternatives: avante.nvim / codecompanion.nvim: their own chat UI calling the API with
+  a key, no Claude Code tools, skills or CLAUDE.md. A Claude-backed completion source for
+  blink (minuet-ai): paid API calls on every keystroke, and Copilot already does this.

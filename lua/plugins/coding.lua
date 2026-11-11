@@ -84,5 +84,41 @@ return {
 	},
 
 	-- Copilot. <Tab> accepts a suggestion. Auth: :Copilot setup (token stays in ~/.config/github-copilot).
-	{ "github/copilot.vim", cmd = "Copilot", event = "InsertEnter" },
+	-- In insert: <M-]>/<M-[> cycle suggestions (plugin defaults); <M-\> is tmux's split, so unused.
+	{
+		"github/copilot.vim",
+		cmd = "Copilot",
+		event = "InsertEnter",
+		keys = {
+			{
+				"<leader>ai",
+				function()
+					local on = vim.g.copilot_enabled ~= 0 -- what :Copilot enable/disable sets; unset = on
+					vim.cmd("Copilot " .. (on and "disable" or "enable"))
+					vim.notify("Copilot inline hints " .. (on and "off" or "on"))
+				end,
+				desc = "Toggle Copilot inline hints",
+			},
+		},
+	},
+
+	-- Claude Code over the IDE protocol: sees the open file/selection, edits arrive as diffs (ADR 0013).
+	-- A claude already running in a tmux pane can attach with /ide.
+	{
+		"coder/claudecode.nvim",
+		dependencies = { "folke/snacks.nvim" },
+		cmd = { "ClaudeCode", "ClaudeCodeFocus", "ClaudeCodeSend", "ClaudeCodeAdd", "ClaudeCodeStatus" },
+		opts = { focus_after_send = true }, -- after sending code, type the request straight away
+		keys = {
+			{ "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
+			{ "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude" },
+			{ "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude session" },
+			{ "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Claude model" },
+			{ "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add buffer to Claude" },
+			{ "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send selection to Claude" },
+			{ "<leader>as", "<cmd>ClaudeCodeTreeAdd<cr>", ft = "oil", desc = "Add file to Claude" },
+			{ "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept Claude diff" },
+			{ "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Reject Claude diff" },
+		},
+	},
 }

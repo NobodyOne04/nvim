@@ -99,7 +99,10 @@ Press `\` and wait to see every leader key.
 | `<C-h>` `<C-l>` | scroll 10 columns left / right |
 | `<Esc>` | clear search highlight |
 | completion | `<C-n>` `<C-p>` select, `<CR>` confirm, `<C-Space>` open / docs, `<C-e>` close, `<C-b>` `<C-f>` scroll docs, `<C-l>` `<C-h>` jump in snippets, `<C-k>` signature |
-| Copilot | `<Tab>` accepts |
+| Copilot | `<Tab>` accepts, `<M-]>` `<M-[>` next / previous suggestion, `\ai` toggle inline hints |
+| `\ac` `\af` `\ar` `\am` | **Claude Code**: toggle / focus the Claude split, resume a session, pick the model |
+| `\as` `\ab` | send the selection (visual; in oil: the file) / the buffer to Claude, then type what to do with it |
+| `\aa` `\ad` | accept / reject the diff Claude proposes |
 
 ## Jupyter notebooks
 
