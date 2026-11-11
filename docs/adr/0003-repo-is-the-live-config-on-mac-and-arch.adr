@@ -1,0 +1,28 @@
+# 0003. The repo is the live config, one config for macOS and Arch
+
+- Status: Accepted
+- Date: 2026-11-05
+
+## Context
+The same editor is used on a Mac and an Arch desktop and should behave the same on both.
+
+## Decision
+- `~/.config/nvim` is a symlink to this repo (`make link`; an existing config is moved to
+  `~/.config/nvim.bak-<date>`, never deleted; `make unlink` restores it).
+- One config for both OSes; differences go through `vim.fn.has("mac")` checks
+  (e.g. `detect_os` in `ui.lua`), not separate branches or files.
+- `make install` sets up a machine: tools (pacman / brew / apt / dnf), link, plugins, servers.
+- Changes go through branches and PRs; `main` is what every machine runs.
+
+## Alternatives
+Not recorded at the time.
+
+## Rationale
+One source of truth; `git pull && make sync` brings a machine up to date.
+
+## Consequences
+- The checked-out branch is the editor in use right now: a feature branch left checked out is
+  live, and never reaches the other machine. Switch back to `main` after pushing.
+
+## References
+- `Makefile`, `scripts/install-tools.sh`, `CLAUDE.md`

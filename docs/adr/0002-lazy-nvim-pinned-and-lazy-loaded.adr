@@ -1,0 +1,31 @@
+# 0002. lazy.nvim, pinned versions, lazy loading
+
+- Status: Accepted
+- Date: 2026-11-05
+
+## Context
+The config runs on a Mac and an Arch desktop. The old setup pinned nothing, so a fresh install
+pulled whatever upstream had that day; treesitter broke this way. Startup speed matters: nvim is
+opened constantly from the shell and tmux.
+
+## Decision
+- Plugins are managed by lazy.nvim, one spec file per theme in `lua/plugins/`.
+- `lazy-lock.json` pins every plugin and is committed with every plugin change; `make sync`
+  restores exactly those versions, `make update` is the only thing that moves them.
+- Everything that can is lazy-loaded (`keys`, `cmd`, `ft`, `event`). `lazy = false` only when a
+  plugin must exist at start, with the reason in a comment. Budget: ~25 ms (`make startup`).
+- No background update checks (`checker.enabled = false`).
+
+## Alternatives
+Not recorded at the time.
+
+## Rationale
+Same tested set on every machine; updates are deliberate and reviewable in a diff.
+Lazy loading keeps start time flat as plugins are added.
+
+## Consequences
+- Lazy-loaded plugins hide errors until triggered; testing has to load them: [0011](0011-headless-make-check.adr).
+- Each machine needs `make sync` after a pull that changed the lockfile.
+
+## References
+- `lua/config/lazy.lua`, `Makefile`, README "Earlier review"

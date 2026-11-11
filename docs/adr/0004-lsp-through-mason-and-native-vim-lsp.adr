@@ -1,0 +1,30 @@
+# 0004. Language servers through mason and Neovim's own LSP API; conform for formatting
+
+- Status: Accepted
+- Date: 2026-11-05
+
+## Context
+Before, LSP keymaps were attached to four named servers only (gopls got none), completion
+capabilities were configured twice, and formatting (formatter.nvim on `\f`) waited a full timeout
+because of a key clash.
+
+## Decision
+- mason installs the servers; `mason-lspconfig` enables every installed one; defaults go through
+  `vim.lsp.config("*", …)`.
+- LSP keymaps come from one `LspAttach` handler, so every server gets them.
+- The server list lives in `lua/plugins/lsp.lua` `servers` **and** the `Makefile` `SERVERS`; both
+  are kept in sync. `make lsp` installs them headless.
+- Formatting is conform.nvim (`\cf`, `:Format`), tools installed by `scripts/install-tools.sh`.
+
+## Alternatives
+- formatter.nvim: replaced by conform (same tools, async).
+- Per-server keymaps: missed servers, as gopls showed.
+
+## Rationale
+A new server only needs adding to the list; it gets keys, completion and installation for free.
+
+## Consequences
+- Two lists to keep in sync (`lsp.lua` and `Makefile`).
+
+## References
+- `lua/plugins/lsp.lua`, `Makefile`, README "Earlier review"

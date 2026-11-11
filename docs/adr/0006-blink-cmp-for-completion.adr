@@ -1,0 +1,25 @@
+# 0006. blink.cmp for completion
+
+- Status: Accepted
+- Date: 2026-11-07
+
+## Context
+Completion was nvim-cmp plus seven companion plugins (cmp-nvim-lsp, -buffer, -path, -cmdline,
+cmp_luasnip, LuaSnip, lspkind); it was configured twice and lspkind icons never showed.
+
+## Decision
+Replace them with blink.cmp. Its native fuzzy matcher is fetched by `make sync`
+(`scripts/blink-fuzzy.lua`).
+
+## Alternatives
+- Keep nvim-cmp and fix its config: eight plugins to keep in step.
+
+## Rationale
+One plugin instead of eight; typo-tolerant fuzzy matching; docs and signature help built in.
+
+## Consequences
+- LSP capabilities come from `blink.cmp` ([0004](0004-lsp-through-mason-and-native-vim-lsp.adr)).
+- The fuzzy matcher is a binary that must be fetched per machine.
+
+## References
+- README "Design pass", `lua/plugins/coding.lua`

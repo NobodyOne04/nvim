@@ -1,0 +1,25 @@
+# 0010. Alt-h/j/k/l moves across nvim splits and tmux panes (smart-splits)
+
+- Status: Accepted
+- Date: 2026-11-07
+
+## Context
+nvim runs inside tmux; moving between nvim splits and tmux panes needed different keys.
+
+## Decision
+smart-splits.nvim binds Alt-h/j/k/l (move) and Alt-Shift-h/j/k/l (resize). It loads at start so
+it can mark the pane as nvim; the tmux side (`~/projects/tmux/conf/keys.conf`) forwards the keys
+when `@pane-is-vim` is set. At the screen edge movement stops (`at_edge = "stop"`), as in tmux.
+
+## Alternatives
+Not recorded at the time. `<C-h>`/`<C-l>` were not used: they are side-scroll keys here.
+
+## Rationale
+One set of keys for one mental model: panes and splits are the same thing.
+
+## Consequences
+- The binding is split across two repos (nvim and tmux) that must agree.
+- Upstream option renames are silent: `at_edge` was ignored for weeks until fixed in PR #2.
+
+## References
+- `lua/plugins/tmux.lua`, PR #1, PR #2

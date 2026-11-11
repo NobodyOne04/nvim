@@ -1,0 +1,26 @@
+# 0005. nvim-treesitter on the main branch (Neovim 0.12+)
+
+- Status: Accepted
+- Date: 2026-11-07
+
+## Context
+The old config used the pre-rewrite API (`require("nvim-treesitter.configs")`) and pinned
+nothing. When the plugin's default branch moved to the rewrite, every fresh install crashed.
+
+## Decision
+Use nvim-treesitter's `main` branch with its new API, pinned in the lockfile. Parsers are listed
+once in `lua/plugins/treesitter.lua` and compiled by `make sync` (`scripts/ts-install.lua`).
+On Neovim older than 0.12 treesitter is skipped with a one-time warning.
+
+## Alternatives
+- Stay on the old `master` branch: frozen upstream, would need migrating later anyway.
+
+## Rationale
+One branch for every machine keeps `lazy-lock.json` valid everywhere.
+
+## Consequences
+- Requires Neovim 0.12+ for treesitter features (Arch ships it; macOS via brew).
+- The old `nvim-treesitter.configs` setup must never come back.
+
+## References
+- `lua/plugins/treesitter.lua`, commit `10539ca`

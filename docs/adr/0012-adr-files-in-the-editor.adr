@@ -1,0 +1,31 @@
+# 0012. ADR files in the editor: markdown look, Proposed-only status changes
+
+- Status: Accepted
+- Date: 2026-11-11
+
+## Context
+ADRs use the `.adr` extension ([0001](0001-record-decisions-as-adr-files.adr)). Neovim opened
+them as plain text, with no way to browse them or record a decision.
+
+## Decision
+- `.adr` is detected as the `markdown` filetype, so highlighting, rendering, LSP and formatting
+  are the same as `.md`.
+- A small in-repo module, `lua/config/adr.lua`: `\Af` picker (status + title), `]A`/`[A`
+  between ADRs, `\Aa` `\Ar` `\Ad` `\As` set Accepted / Rejected / Deprecated / Superseded.
+- Only a **Proposed** ADR can change status; decided ADRs are history and are refused.
+  Superseded links both ADRs. The Date line becomes the decision date.
+
+## Alternatives
+- A separate plugin repo: a second project and lockfile entry for ~150 lines; can be split out
+  later if others want it.
+- A custom `adr` filetype: every markdown plugin would need registering again.
+
+## Rationale
+Least code that gives full markdown support plus the ADR workflow, synced with the config.
+
+## Consequences
+- `]A`/`[A` hide Neovim's arglist `:last`/`:rewind` inside `.adr` buffers.
+- The picker finds ADRs through `git ls-files`.
+
+## References
+- `lua/config/adr.lua`, PR #3

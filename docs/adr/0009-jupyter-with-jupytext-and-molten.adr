@@ -1,0 +1,29 @@
+# 0009. Jupyter notebooks: jupytext, molten and image.nvim
+
+- Status: Accepted
+- Date: 2026-11-07
+
+## Context
+Notebooks (`.ipynb`) should open, run and be edited in Neovim with normal Python tooling.
+
+## Decision
+- jupytext.nvim opens a notebook as a `# %%` percent-format Python script and writes it back on
+  save, keeping outputs. It loads at start because it owns `BufReadCmd *.ipynb`.
+- molten-nvim runs cells in a real Jupyter kernel; image.nvim draws plots via the kitty graphics
+  protocol (Ghostty/kitty).
+- molten runs on a dedicated python host, `~/.local/share/nvim/python-host` (`make notebook`);
+  project kernels are registered with `make kernel VENV=…`.
+- Cell helpers and keys (`<leader>j`, `]j`/`[j`) live in `lua/config/notebook.lua`.
+
+## Alternatives
+Not recorded at the time.
+
+## Rationale
+The notebook is plain Python in the buffer, so pyright, completion and formatting work unchanged.
+
+## Consequences
+- molten's commands come from `:UpdateRemotePlugins`; it must not get a `cmd` lazy trigger.
+- Needs `uv`, a python host per machine, and tmux `allow-passthrough on` for images.
+
+## References
+- `lua/plugins/notebook.lua`, `lua/config/notebook.lua`, commit `b3e8202`

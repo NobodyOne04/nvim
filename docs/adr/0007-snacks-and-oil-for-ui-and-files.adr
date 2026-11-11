@@ -1,0 +1,27 @@
+# 0007. snacks.nvim for UI pieces, oil.nvim for files
+
+- Status: Accepted
+- Date: 2026-11-07
+
+## Context
+UI pieces (start screen, notifications, prompts, pickers, buffer delete) came from separate
+plugins or were missing; the telescope file browser made telescope load at startup.
+
+## Decision
+- snacks.nvim provides the start screen, notifications, rename box, code-action picker,
+  buffer delete that keeps splits, word highlight/jumps, lazygit float and big-file handling.
+  It loads at start with priority 1000.
+- oil.nvim replaces telescope-file-browser: folders are edited as text.
+- telescope stays for find/grep (`<C-p>`, `<C-f>`, `\f…`), loaded on first use.
+
+## Alternatives
+- telescope-file-browser: kept telescope in the startup path.
+
+## Rationale
+Fewer plugins for more features, one consistent look, faster start.
+
+## Consequences
+- snacks and oil are among the few `lazy = false` plugins ([0002](0002-lazy-nvim-pinned-and-lazy-loaded.adr)).
+
+## References
+- README "Design pass", `lua/plugins/ui.lua`, `lua/plugins/editor.lua`
