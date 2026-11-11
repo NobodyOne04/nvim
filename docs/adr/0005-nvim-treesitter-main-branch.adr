@@ -3,24 +3,35 @@
 - Status: Accepted
 - Date: 2026-11-07
 
-## Context
-The old config used the pre-rewrite API (`require("nvim-treesitter.configs")`) and pinned
-nothing. When the plugin's default branch moved to the rewrite, every fresh install crashed.
+nvim-treesitter runs from its rewritten `main` branch with the new API, pinned, with parsers
+listed once and compiled by `make sync`.
 
-## Decision
-Use nvim-treesitter's `main` branch with its new API, pinned in the lockfile. Parsers are listed
-once in `lua/plugins/treesitter.lua` and compiled by `make sync` (`scripts/ts-install.lua`).
-On Neovim older than 0.12 treesitter is skipped with a one-time warning.
+## Technical details
+- **Problem**: the old config used the pre-rewrite API (`require("nvim-treesitter.configs")`)
+  and pinned nothing. When the plugin's default branch moved to the rewrite, every fresh
+  install crashed.
+- **Spec** (`lua/plugins/treesitter.lua`): `branch = "main"`, `lazy = false`,
+  `build = ":TSUpdate"`, `cond = vim.fn.has("nvim-0.12") == 1`. On older Neovim it is
+  skipped and a one-time `vim.notify` warning says how to upgrade.
+- **Parsers**: one `parsers` list (38: bash, go, python, lua, markdown, sql, terraform, yaml,
+  qmljs, ...) passed as `opts.parsers` to `require("nvim-treesitter").install()`.
+  `scripts/ts-install.lua` reads the same list from lazy's spec, so there is no second copy.
+- **Per buffer**: a `FileType` autocmd (group `archminimal-ts`) runs
+  `vim.treesitter.start()` (silently skipped for languages without a parser), sets
+  `indentexpr` to nvim-treesitter's, and folds with `vim.treesitter.foldexpr()`
+  (`foldmethod=expr`). Neovim 0.12 drops fold work done while a file opens, so a scheduled
+  `normal! zx` recomputes folds once opening is done.
+- **`make sync`**: `scripts/ts-install.lua` needs the `tree-sitter` CLI and a C compiler
+  (`make tools`), installs every parser and waits for it (30 min cap), then lists any missing
+  ones and exits non-zero. Without it, a headless `+qa` exits before the background build.
+- **Extras**: nvim-treesitter-context pins the enclosing function/class (max 3 lines,
+  `\ct` toggles).
+- **Consequences**: one branch for every machine keeps `lazy-lock.json` valid everywhere.
+  Requires Neovim 0.12+ (Arch ships it; macOS via brew). The old
+  `nvim-treesitter.configs` setup must never come back.
 
-## Alternatives
-- Stay on the old `master` branch: frozen upstream, would need migrating later anyway.
-
-## Rationale
-One branch for every machine keeps `lazy-lock.json` valid everywhere.
-
-## Consequences
-- Requires Neovim 0.12+ for treesitter features (Arch ships it; macOS via brew).
-- The old `nvim-treesitter.configs` setup must never come back.
-
-## References
-- `lua/plugins/treesitter.lua`, commit `10539ca`
+## Technologies and alternatives
+- Involved: nvim-treesitter (`main`), tree-sitter CLI, a C compiler,
+  nvim-treesitter-context.
+- Alternatives: stay on the old `master` branch: frozen upstream, migration needed later
+  anyway.

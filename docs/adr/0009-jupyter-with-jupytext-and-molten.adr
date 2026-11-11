@@ -3,27 +3,41 @@
 - Status: Accepted
 - Date: 2026-11-07
 
-## Context
-Notebooks (`.ipynb`) should open, run and be edited in Neovim with normal Python tooling.
+Notebooks open as plain Python with `# %%` cells, run in a real Jupyter kernel and show
+plots in the terminal.
 
-## Decision
-- jupytext.nvim opens a notebook as a `# %%` percent-format Python script and writes it back on
-  save, keeping outputs. It loads at start because it owns `BufReadCmd *.ipynb`.
-- molten-nvim runs cells in a real Jupyter kernel; image.nvim draws plots via the kitty graphics
-  protocol (Ghostty/kitty).
-- molten runs on a dedicated python host, `~/.local/share/nvim/python-host` (`make notebook`);
-  project kernels are registered with `make kernel VENV=…`.
-- Cell helpers and keys (`<leader>j`, `]j`/`[j`) live in `lua/config/notebook.lua`.
+## Technical details
+- **Problem**: `.ipynb` files should open, run and be edited in Neovim with normal Python
+  tooling (pyright, completion, formatting).
+- **jupytext.nvim** (`lua/plugins/notebook.lua`): `style = "percent"`,
+  `output_extension = "auto"`; converts the notebook to a script on read and writes it back
+  on save, outputs kept. `lazy = false` because it owns `BufReadCmd *.ipynb`; setup only
+  registers the autocmd, so start cost is nil. The jupytext CLI comes from
+  `uv tool install jupytext`.
+- **molten-nvim** (`version = "^1.0.0"`, `build = ":UpdateRemotePlugins"`): runs cells in a
+  Jupyter kernel; outputs as virtual text under each cell (max 20 lines), float only on
+  `\jo`, tick rate 150 ms. No `cmd` lazy trigger: its commands come from the remote-plugin
+  manifest and lazy's stand-ins would replace them.
+- **image.nvim**: `backend = "kitty"` (Ghostty speaks the kitty graphics protocol),
+  `processor = "magick_cli"`, only molten draws images (markdown and other integrations
+  off), max 100x20, hidden under floats. Inside tmux it needs `allow-passthrough on`.
+- **Python host**: `make notebook` creates `~/.local/share/nvim/python-host` with
+  `uv venv --python 3.12` and installs `pynvim`, `jupyter_client`, `nbformat`, `pillow`;
+  `options.lua` sets `python3_host_prog` to it (else the provider is off). Ruby, Perl and
+  Node providers are disabled. `make kernel VENV=path/.venv [NAME=...]` installs `ipykernel`
+  in a project venv and registers it.
+- **Cells** (`lua/config/notebook.lua`): a cell is the text between two `<comment> %%` lines
+  (comment leader from `commentstring`, so `// %%` in Go); `[markdown]`/`[raw]` cells are
+  skipped when running; a file without markers is one cell. Kernel choice: the one saved in
+  the notebook, else the one registered for the project's `.venv`, else a list.
+- **Keys** under `\j`: `ji` start kernel, `jr` run cell (visual: selection), `jn` run and
+  next, `ja`/`jA`/`jb` all/above/below, `jl` line, `jo`/`jh` output, `jd`/`jD` delete
+  outputs, `jx` interrupt, `jR` restart, `jp` plot popup, `jc`/`jm` new code/markdown cell;
+  `]j`/`[j` move between cells.
+- **Consequences**: the notebook is plain Python in the buffer, so all tooling works
+  unchanged. Needs `uv`, a python host per machine, ImageMagick, and tmux passthrough for
+  images.
 
-## Alternatives
-Not recorded at the time.
-
-## Rationale
-The notebook is plain Python in the buffer, so pyright, completion and formatting work unchanged.
-
-## Consequences
-- molten's commands come from `:UpdateRemotePlugins`; it must not get a `cmd` lazy trigger.
-- Needs `uv`, a python host per machine, and tmux `allow-passthrough on` for images.
-
-## References
-- `lua/plugins/notebook.lua`, `lua/config/notebook.lua`, commit `b3e8202`
+## Technologies and alternatives
+- Involved: jupytext.nvim + jupytext CLI, molten-nvim, image.nvim, Jupyter
+  (`jupyter_client`, `ipykernel`), pynvim, uv, ImageMagick, kitty graphics protocol.

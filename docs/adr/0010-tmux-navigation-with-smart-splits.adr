@@ -3,23 +3,28 @@
 - Status: Accepted
 - Date: 2026-11-07
 
-## Context
-nvim runs inside tmux; moving between nvim splits and tmux panes needed different keys.
+The same Alt keys move between and resize nvim splits and tmux panes, as if they were one
+thing.
 
-## Decision
-smart-splits.nvim binds Alt-h/j/k/l (move) and Alt-Shift-h/j/k/l (resize). It loads at start so
-it can mark the pane as nvim; the tmux side (`~/projects/tmux/conf/keys.conf`) forwards the keys
-when `@pane-is-vim` is set. At the screen edge movement stops (`at_edge = "stop"`), as in tmux.
+## Technical details
+- **Problem**: nvim runs inside tmux; moving between nvim splits and tmux panes needed
+  different keys.
+- **nvim side** (`lua/plugins/tmux.lua`): `mrjones2014/smart-splits.nvim`, `lazy = false` so
+  it marks the tmux pane as nvim (`@pane-is-vim`) from the start. Keys: `<A-h/j/k/l>` move
+  (`move_cursor_*`), `<A-H/J/K/L>` resize by 3 (`resize_*`). Options:
+  `move = { at_edge = "stop" }` (no wrap to the other side, as in tmux),
+  `resize = { amount = 3 }`. Outside tmux the same keys work on nvim splits only.
+- **tmux side** (`~/projects/tmux/conf/keys.conf`): `bind -n M-h if -F '#{@pane-is-vim}'
+  { send-keys M-h } { if -F '#{pane_at_left}' {} { select-pane -L } }`, and the same for
+  j/k/l: in an nvim pane the key goes to nvim, otherwise tmux moves, and stops at the window
+  edge. At the edge of nvim's splits, smart-splits moves on to the tmux pane.
+- **Kept keys**: `<C-h>`/`<C-l>` stay side-scroll (in insert mode, snippet jumps), so they
+  were not used for navigation.
+- **Consequences**: one set of keys, one mental model. The binding is split across two repos
+  (nvim and tmux) that must agree. Upstream option renames are silent: `at_edge` was
+  ignored for weeks until fixed in PR #2; check `:checkhealth smart-splits` after updates.
 
-## Alternatives
-Not recorded at the time. `<C-h>`/`<C-l>` were not used: they are side-scroll keys here.
-
-## Rationale
-One set of keys for one mental model: panes and splits are the same thing.
-
-## Consequences
-- The binding is split across two repos (nvim and tmux) that must agree.
-- Upstream option renames are silent: `at_edge` was ignored for weeks until fixed in PR #2.
-
-## References
-- `lua/plugins/tmux.lua`, PR #1, PR #2
+## Technologies and alternatives
+- Involved: smart-splits.nvim, tmux user options.
+- Alternatives: `<C-h/j/k/l>` (vim-tmux-navigator style): already taken by side-scroll and
+  snippet jumps here.

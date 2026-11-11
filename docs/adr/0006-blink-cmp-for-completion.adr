@@ -3,23 +3,33 @@
 - Status: Accepted
 - Date: 2026-11-07
 
-## Context
-Completion was nvim-cmp plus seven companion plugins (cmp-nvim-lsp, -buffer, -path, -cmdline,
-cmp_luasnip, LuaSnip, lspkind); it was configured twice and lspkind icons never showed.
+Completion is one plugin, blink.cmp, with a prebuilt native fuzzy matcher, replacing nvim-cmp
+and its seven helpers.
 
-## Decision
-Replace them with blink.cmp. Its native fuzzy matcher is fetched by `make sync`
-(`scripts/blink-fuzzy.lua`).
+## Technical details
+- **Problem**: completion was nvim-cmp plus cmp-nvim-lsp, -buffer, -path, -cmdline,
+  cmp_luasnip, LuaSnip and lspkind; it was configured twice and lspkind icons never showed.
+- **Spec** (`lua/plugins/coding.lua`): `saghen/blink.cmp`, `version = "1.*"` (release tags ship
+  the prebuilt matcher, no Rust toolchain), loaded on `InsertEnter`/`CmdlineEnter`, snippets
+  from friendly-snippets.
+- **Keys** (`preset = "none"`, same keys as before): `<C-n>`/`<C-p>` show and select,
+  `<CR>` accept, `<C-Space>` docs, `<C-e>` hide, `<C-b>`/`<C-f>` scroll docs, `<C-l>`/`<C-h>`
+  snippet jumps, `<C-k>` signature. `<Tab>` stays free for Copilot.
+- **Look**: rounded menu without scrollbar, columns kind icon / label / kind (icons and kinds
+  hidden on the `:` line), docs auto-shown after 250 ms, signature help on, ghost text off
+  (Copilot draws its own), first item preselected without auto-insert.
+- **Sources**: `lsp`, `path`, `snippets`, `buffer`; Lua adds `lazydev` (score +100) for the
+  Neovim API; sql/mysql/plsql use `dadbod` (vim-dadbod-completion). Cmdline completion on
+  `:` and `/` with the `cmdline` preset.
+- **Fuzzy matcher**: `implementation = "prefer_rust_with_warning"`. `make sync`/`make update`
+  run `scripts/blink-fuzzy.lua`, which loads blink and waits up to 90 s for the matcher to
+  become `rust`; if it can't be fetched, completion uses the slower Lua matcher and the
+  script only warns (it fails only if the config itself didn't load).
+- **LSP**: blink provides the capabilities for every server
+  ([0004](0004-lsp-through-mason-and-native-vim-lsp.adr)).
+- **Consequences**: one plugin instead of eight; typo-tolerant matching; docs and signature
+  help built in. The matcher is a binary fetched per machine.
 
-## Alternatives
-- Keep nvim-cmp and fix its config: eight plugins to keep in step.
-
-## Rationale
-One plugin instead of eight; typo-tolerant fuzzy matching; docs and signature help built in.
-
-## Consequences
-- LSP capabilities come from `blink.cmp` ([0004](0004-lsp-through-mason-and-native-vim-lsp.adr)).
-- The fuzzy matcher is a binary that must be fetched per machine.
-
-## References
-- README "Design pass", `lua/plugins/coding.lua`
+## Technologies and alternatives
+- Involved: blink.cmp, friendly-snippets, lazydev.nvim, vim-dadbod-completion, copilot.vim.
+- Alternatives: keep nvim-cmp and fix its config: eight plugins to keep in step.

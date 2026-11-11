@@ -3,29 +3,36 @@
 - Status: Accepted
 - Date: 2026-11-05
 
-## Context
-The config runs on a Mac and an Arch desktop. The old setup pinned nothing, so a fresh install
-pulled whatever upstream had that day; treesitter broke this way. Startup speed matters: nvim is
-opened constantly from the shell and tmux.
+Plugins are managed by lazy.nvim, pinned in a committed lockfile, and loaded on first use so
+startup stays around 25 ms.
 
-## Decision
-- Plugins are managed by lazy.nvim, one spec file per theme in `lua/plugins/`.
-- `lazy-lock.json` pins every plugin and is committed with every plugin change; `make sync`
-  restores exactly those versions, `make update` is the only thing that moves them.
-- Everything that can is lazy-loaded (`keys`, `cmd`, `ft`, `event`). `lazy = false` only when a
-  plugin must exist at start, with the reason in a comment. Budget: ~25 ms (`make startup`).
-- No background update checks (`checker.enabled = false`).
+## Technical details
+- **Problem**: the config runs on a Mac and an Arch desktop. The old setup pinned nothing, so
+  a fresh install pulled whatever upstream had that day (treesitter broke this way). nvim is
+  opened constantly from the shell and tmux, so startup time matters.
+- **Bootstrap** (`lua/config/lazy.lua`): clones `folke/lazy.nvim` (`--branch=stable`,
+  `--filter=blob:none`) into `stdpath("data")/lazy` if missing, prepends it to `rtp`. Load
+  order from `init.lua`: leader (`\`), options, keymaps, autocmds, lazy.
+- **Setup**: `spec = { { import = "plugins" } }`, one spec file per theme in `lua/plugins/`
+  (`core`, `editor`, `coding`, `lsp`, `treesitter`, `ui`, `tools`, `notebook`, `tmux`);
+  `checker.enabled = false` (no background update checks); `change_detection.notify = false`;
+  built-in `gzip`, `tarPlugin`, `tohtml`, `tutor`, `zipPlugin` disabled.
+- **Pinning**: `lazy-lock.json` pins every plugin's commit and is committed with every plugin
+  change. `make sync` = `Lazy! restore` + `Lazy! clean`, then the blink fuzzy matcher and
+  treesitter parsers; `make update` (`Lazy! sync`) is the only thing that moves versions and
+  prints the lockfile diff. Some specs add a semver range on top (`blink.cmp` `1.*`,
+  `molten-nvim` `^1.0.0`).
+- **Lazy loading**: every plugin that can loads on `keys`, `cmd`, `ft` or `event`.
+  `lazy = false` only where it must exist at start, with the reason in a comment:
+  tokyonight and snacks (priority 1000), oil (opens directories), smart-splits (tmux needs
+  to know the pane is nvim), jupytext (owns `BufReadCmd *.ipynb`), nvim-treesitter.
+  A plugin's keymaps live in its spec's `keys`, not in `keymaps.lua`.
+- **Budget**: ~25 ms (now ~20 ms, ~65 ms opening a file), measured by `make startup` (5 runs
+  of `--startuptime`, "NVIM STARTED" line).
+- **Consequences**: same tested set on every machine; updates are deliberate and reviewable in
+  a diff. Lazy-loaded plugins hide errors until triggered, so testing loads them all
+  ([0011](0011-headless-make-check.adr)). Each machine runs `make sync` after a pull that
+  changed the lockfile.
 
-## Alternatives
-Not recorded at the time.
-
-## Rationale
-Same tested set on every machine; updates are deliberate and reviewable in a diff.
-Lazy loading keeps start time flat as plugins are added.
-
-## Consequences
-- Lazy-loaded plugins hide errors until triggered; testing has to load them: [0011](0011-headless-make-check.adr).
-- Each machine needs `make sync` after a pull that changed the lockfile.
-
-## References
-- `lua/config/lazy.lua`, `Makefile`, README "Earlier review"
+## Technologies and alternatives
+- Involved: lazy.nvim, git.

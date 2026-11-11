@@ -3,25 +3,33 @@
 - Status: Accepted
 - Date: 2026-11-07
 
-## Context
-UI pieces (start screen, notifications, prompts, pickers, buffer delete) came from separate
-plugins or were missing; the telescope file browser made telescope load at startup.
+snacks.nvim provides most small UI pieces, oil.nvim edits directories as text, and
+telescope stays only for find and grep, loaded on first use.
 
-## Decision
-- snacks.nvim provides the start screen, notifications, rename box, code-action picker,
-  buffer delete that keeps splits, word highlight/jumps, lazygit float and big-file handling.
-  It loads at start with priority 1000.
-- oil.nvim replaces telescope-file-browser: folders are edited as text.
-- telescope stays for find/grep (`<C-p>`, `<C-f>`, `\f…`), loaded on first use.
+## Technical details
+- **Problem**: UI pieces (start screen, notifications, prompts, pickers, buffer delete) came
+  from separate plugins or were missing; the telescope file browser made telescope load at
+  startup.
+- **snacks.nvim** (`lua/plugins/ui.lua`): `lazy = false`, `priority = 1000` (as
+  `:checkhealth snacks` asks). Enabled modules:
+  - `dashboard`: start screen with the OS logo, wordmark, shortcuts (lazygit only if
+    installed), recent files and startup time;
+  - `notifier` (compact, 3 s; `\n` shows history), `input` (rename and prompts in a small box
+    at the cursor);
+  - `words` (highlight other uses of the word; `]]`/`[[` jump between them via LSP);
+  - `bufdelete` on `\e` (keeps the window layout), `lazygit` float on `\gg`, file history on
+    `\gl`;
+  - `bigfile` (huge files open with heavy features off), and `Snacks.picker` for small
+    lists such as the ADR picker ([0012](0012-adr-files-in-the-editor.adr)).
+- **oil.nvim** (`lua/plugins/editor.lua`): `lazy = false` so `nvim .` opens a directory;
+  `-` opens the parent directory; global keys like `<C-p>` stay working inside oil. It
+  replaces telescope-file-browser (`\fb` still opens a browser).
+- **telescope**: `<C-p>` files, `<C-f>` live grep, `\bb` buffers, `\fh` help, `\fg` grep
+  in cwd, `\fr` recent, `\fd` diagnostics, `\fs` symbols, `\fw` word, `\fk` keymaps;
+  telescope-fzf-native if `make` exists. Loaded only on these keys.
+- **Consequences**: fewer plugins for more features, one look, faster start. snacks and oil
+  are among the few `lazy = false` plugins ([0002](0002-lazy-nvim-pinned-and-lazy-loaded.adr)).
 
-## Alternatives
-- telescope-file-browser: kept telescope in the startup path.
-
-## Rationale
-Fewer plugins for more features, one consistent look, faster start.
-
-## Consequences
-- snacks and oil are among the few `lazy = false` plugins ([0002](0002-lazy-nvim-pinned-and-lazy-loaded.adr)).
-
-## References
-- README "Design pass", `lua/plugins/ui.lua`, `lua/plugins/editor.lua`
+## Technologies and alternatives
+- Involved: snacks.nvim, oil.nvim, telescope.nvim, telescope-fzf-native, lazygit.
+- Alternatives: telescope-file-browser: kept telescope in the startup path.

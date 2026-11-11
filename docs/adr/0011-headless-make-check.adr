@@ -3,23 +3,31 @@
 - Status: Accepted
 - Date: 2026-11-11
 
-## Context
-lazy.nvim and plugins report errors through `vim.notify`, which prints nothing with `--headless`.
-A plain `nvim --headless +qa` passed with a broken lazy-loaded plugin.
+`make check` loads every plugin and opens a file per language headless, catching errors that
+plugins only report through `vim.notify`.
 
-## Decision
-`make check` runs (1) a plain headless start, then (2) `scripts/check.lua`, which captures
-`vim.notify`, loads every plugin and opens one file per language. Any error fails it.
-`make startup` times five starts against the budget in [0002](0002-lazy-nvim-pinned-and-lazy-loaded.adr).
+## Technical details
+- **Problem**: lazy.nvim and plugins report errors through `vim.notify`, which prints nothing
+  with `--headless`. A plain `nvim --headless +qa` passed with a broken lazy-loaded plugin.
+- **Step 1**: `nvim --headless "+qa"`; output is printed and the step fails if it matches
+  `E[0-9]+:`, `[Ee]rror` or `stack traceback`.
+- **Step 2**: `nvim --headless -c "luafile scripts/check.lua"`:
+  - replaces `vim.notify` to collect messages: `ERROR` and above become errors, `WARN`
+    warnings;
+  - runs `Lazy! load all` inside `pcall`;
+  - opens `check.<ext>` in a temp dir for `py go lua ts sh sql md json yaml toml`, so
+    `FileType`, LSP and treesitter hooks run;
+  - waits 1.5 s for scheduled callbacks (folds, LSP attach), deletes the temp dir;
+  - prints warnings and errors to stderr and exits with `cquit 1` on any error.
+  Its output goes through the same error grep.
+- **Timing**: `make startup` runs `--startuptime` to a temp file 5 times (stdout prints
+  nothing headless) against the budget in [0002](0002-lazy-nvim-pinned-and-lazy-loaded.adr).
+- **Health**: `nvim --headless "+checkhealth <name>" "+w! out.txt" +qa!` for one plugin;
+  known noise (optional language tools, Snacks images headless, jupytext's health crash) is
+  listed in `CLAUDE.md`.
+- **Consequences**: broken plugins are caught before they reach `main` and every machine. A
+  new language or plugin should be covered by `scripts/check.lua`'s file list. LSP checks
+  that read diagnostics need a longer wait (`vim.defer_fn(..., 8000)`).
 
-## Alternatives
-- Plain headless start: misses errors, as above.
-
-## Rationale
-Catches broken plugins before they reach `main` and every machine.
-
-## Consequences
-- New languages or plugins should be covered by `scripts/check.lua`.
-
-## References
-- `Makefile`, `scripts/check.lua`, PR #2
+## Technologies and alternatives
+- Alternatives: plain headless start: misses errors, as above.

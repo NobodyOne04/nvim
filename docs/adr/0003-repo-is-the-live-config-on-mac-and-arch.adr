@@ -3,26 +3,28 @@
 - Status: Accepted
 - Date: 2026-11-05
 
-## Context
-The same editor is used on a Mac and an Arch desktop and should behave the same on both.
+`~/.config/nvim` is a symlink to this repo, and the same files serve the Mac and Arch, with
+OS differences handled inline.
 
-## Decision
-- `~/.config/nvim` is a symlink to this repo (`make link`; an existing config is moved to
-  `~/.config/nvim.bak-<date>`, never deleted; `make unlink` restores it).
-- One config for both OSes; differences go through `vim.fn.has("mac")` checks
-  (e.g. `detect_os` in `ui.lua`), not separate branches or files.
-- `make install` sets up a machine: tools (pacman / brew / apt / dnf), link, plugins, servers.
-- Changes go through branches and PRs; `main` is what every machine runs.
+## Technical details
+- **Problem**: the same editor is used on a Mac and an Arch desktop and should behave the same
+  on both, with one place to change it.
+- **Link**: `make link` symlinks `$(HOME)/.config/nvim` to the repo. An existing config (file,
+  dir or other link) is moved to `~/.config/nvim.bak-<YYYYmmdd-HHMMSS>`, never deleted;
+  re-running is a no-op when already linked. `make unlink` removes the link and restores the
+  newest backup.
+- **Install**: `make install` = `tools` (`scripts/install-tools.sh`: brew on macOS; pacman,
+  apt or dnf on Linux: neovim, ripgrep, fd, fzf, tree-sitter CLI, node, go, formatters) +
+  `link` + `sync` + `lsp` + `notebook`.
+- **OS differences inline**: `vim.fn.has("mac")`, never separate branches or files. Example:
+  `detect_os()` in `lua/plugins/ui.lua` returns `mac`, `arch` (from `/etc/os-release`) or
+  `linux` and picks the start-screen logo, wordmark (`archminimal`, `apple silicon` /
+  `intel mac`, or the distro name) and statusline icon.
+- **Flow**: changes go through branches and PRs; `main` is what every machine runs. After a
+  merge: `git pull` on each machine, `make sync` if `lazy-lock.json` changed.
+- **Consequences**: one source of truth; `git pull && make sync` brings a machine up to date.
+  The checked-out branch is the editor in use right now: a feature branch left checked out
+  is live and never reaches the other machine, so switch back to `main` after pushing.
 
-## Alternatives
-Not recorded at the time.
-
-## Rationale
-One source of truth; `git pull && make sync` brings a machine up to date.
-
-## Consequences
-- The checked-out branch is the editor in use right now: a feature branch left checked out is
-  live, and never reaches the other machine. Switch back to `main` after pushing.
-
-## References
-- `Makefile`, `scripts/install-tools.sh`, `CLAUDE.md`
+## Technologies and alternatives
+- Involved: GNU Make, Homebrew / pacman / apt / dnf.
