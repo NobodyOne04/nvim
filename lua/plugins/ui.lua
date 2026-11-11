@@ -127,6 +127,9 @@ return {
 					hl.AdrRejected = { fg = danger }
 					hl.AdrDeprecated = { fg = mute, italic = true }
 					hl.AdrSuperseded = { fg = mute, italic = true }
+				-- markdown/ADR links: the [label] stands out (gd/gpd follow it), the (path) recedes
+				hl["@markup.link.label"] = { fg = accent, underline = true }
+				hl["@markup.link.url"] = { fg = mute }
 					hl.FoldColumn = { fg = dim }
 					-- whitespace markers: visible only when you look for them
 					hl.Whitespace = { fg = faint }
