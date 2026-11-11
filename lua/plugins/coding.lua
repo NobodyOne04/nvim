@@ -109,6 +109,27 @@ return {
 		dependencies = { "folke/snacks.nvim" },
 		cmd = { "ClaudeCode", "ClaudeCodeFocus", "ClaudeCodeSend", "ClaudeCodeAdd", "ClaudeCodeStatus" },
 		opts = { focus_after_send = true }, -- after sending code, type the request straight away
+		config = function(_, opts)
+			require("claudecode").setup(opts)
+			-- Claude Code drops the line of an empty (cursor-only) selection and keeps just the file name,
+			-- so report the cursor's whole line as a one-line selection: Claude sees file + line number.
+			local sel = require("claudecode.selection")
+			if type(sel.get_cursor_position) ~= "function" then
+				return vim.notify("claudecode: get_cursor_position is gone, cursor line not sent", vim.log.levels.WARN)
+			end
+			local cursor_only = sel.get_cursor_position
+			sel.get_cursor_position = function(winid)
+				local s = cursor_only(winid)
+				local buf = winid and vim.api.nvim_win_get_buf(winid) or vim.api.nvim_get_current_buf()
+				local row = s.selection.start.line
+				local line = vim.api.nvim_buf_get_lines(buf, row, row + 1, false)[1] or ""
+				if line:match("%S") then -- a blank line has nothing to show: keep the file-only report
+					s.text = line
+					s.selection = { start = { line = row, character = 0 }, ["end"] = { line = row, character = #line }, isEmpty = false }
+				end
+				return s
+			end
+		end,
 		keys = {
 			{ "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
 			{ "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude" },
