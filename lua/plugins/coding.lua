@@ -129,6 +129,41 @@ return {
 				end
 				return s
 			end
+
+			-- The plugin reports the cursor only when it moves, and never again when Claude connects: \ac reports it
+			-- before Claude is listening, so Claude has nothing until you move. Re-send it on each new connection,
+			-- after the same delay the plugin gives its queued @ mentions.
+			local main = require("claudecode")
+			local flush = main.process_mention_queue
+			if type(flush) ~= "function" then
+				return vim.notify("claudecode: process_mention_queue is gone, position not sent on connect", vim.log.levels.WARN)
+			end
+			main.process_mention_queue = function(new_connection)
+				flush(new_connection)
+				if not new_connection then
+					return
+				end
+				vim.defer_fn(function()
+					local s = sel.get_latest_selection()
+					-- nothing reported yet, or only a nameless buffer (dashboard, scratch): use the file window you came from
+					if not s or vim.fn.filereadable(s.filePath) == 0 then
+						s = nil
+						local wins = { vim.fn.win_getid(vim.fn.winnr("#")) }
+						vim.list_extend(wins, vim.api.nvim_tabpage_list_wins(0))
+						for _, w in ipairs(wins) do
+							local b = w ~= 0 and vim.api.nvim_win_is_valid(w) and vim.api.nvim_win_get_buf(w)
+							if b and vim.bo[b].buftype == "" and vim.api.nvim_buf_get_name(b) ~= "" then
+								s = sel.get_cursor_position(w)
+								sel.state.latest_selection = s
+								break
+							end
+						end
+					end
+					if s then
+						sel.send_selection_update(s)
+					end
+				end, main.state.config.connection_wait_delay)
+			end
 		end,
 		keys = {
 			{ "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
