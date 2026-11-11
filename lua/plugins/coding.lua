@@ -173,6 +173,48 @@ return {
 			{ "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add buffer to Claude" },
 			{ "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send selection to Claude" },
 			{ "<leader>as", "<cmd>ClaudeCodeTreeAdd<cr>", ft = "oil", desc = "Add file to Claude" },
+			{
+				"<leader>ak",
+				-- Cmd+K style: ask about the cursor line / selection without leaving the buffer.
+				-- Typed as "@file#Lx-y <request>" into Claude's prompt, so the answer (or diff) comes in the split.
+				function()
+					local a, b = vim.fn.line("v"), vim.fn.line(".") -- outside visual mode both are the cursor line
+					if a > b then
+						a, b = b, a
+					end
+					local file = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":.")
+					vim.cmd("normal! \27")
+					if file == "" or vim.bo.buftype ~= "" then
+						return vim.notify("Claude: not a file", vim.log.levels.WARN)
+					end
+					vim.ui.input({ prompt = ("Claude (%s:%d-%d): "):format(vim.fn.fnamemodify(file, ":t"), a, b) }, function(ask)
+						if not ask or ask == "" then
+							return
+						end
+						local msg = ("@%s#L%d%s %s"):format(file, a, a == b and "" or "-" .. b, ask)
+						local cc, term = require("claudecode"), require("claudecode.terminal")
+						if not cc.is_claude_connected() then
+							term.open() -- start Claude, send once it has connected and settled (30 s max)
+						end
+						local tries = 0
+						local function send()
+							if cc.is_claude_connected() then
+								return vim.defer_fn(function()
+									term.send_to_terminal(msg, { focus = true })
+								end, tries > 0 and cc.state.config.connection_wait_delay or 0)
+							end
+							tries = tries + 1
+							if tries > 60 then
+								return vim.notify("Claude didn't connect, request not sent", vim.log.levels.WARN)
+							end
+							vim.defer_fn(send, 500)
+						end
+						send()
+					end)
+				end,
+				mode = { "n", "x" },
+				desc = "Ask Claude about line/selection",
+			},
 			{ "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept Claude diff" },
 			{ "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Reject Claude diff" },
 		},

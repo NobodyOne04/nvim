@@ -102,6 +102,7 @@ Press `\` and wait to see every leader key.
 | Copilot | `<Tab>` accepts, `<M-]>` `<M-[>` next / previous suggestion, `\ai` toggle inline hints |
 | `\ac` `\af` `\ar` `\am` | **Claude Code**: toggle / focus the Claude split, resume a session, pick the model |
 | `\as` `\ab` | send the selection (visual; in oil: the file) / the buffer to Claude, then type what to do with it |
+| `\ak` | **ask Claude inline** (Cmd+K): type a request about the cursor line or the selection in a prompt box; it goes to Claude as `@file#Lx-y <request>` (starts Claude if needed) |
 | `\aa` `\ad` | accept / reject the diff Claude proposes |
 
 ## Jupyter notebooks
