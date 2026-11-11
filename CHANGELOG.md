@@ -16,6 +16,7 @@
 - tmux navigation: Alt-h/j/k/l across nvim splits and tmux panes (#1)
 
 ### Fixed
+- Claude sees the line under the cursor, not just the file name
 - Alt-h/j/k/l stops at the screen edge as intended: smart-splits had renamed its options and was wrapping
 - snacks.nvim loads with the priority it asks for (1000)
 
