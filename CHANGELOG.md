@@ -19,5 +19,6 @@
 - snacks.nvim loads with the priority it asks for (1000)
 
 ### Changed
+- Markdown and ADR links: the label in the cyan accent, underlined; the path greyed out
 - ADRs rewritten in the new template (purpose, technical details, technologies and alternatives), with the implementation details
 - lua_ls: the `globals = { "vim" }` workaround is gone; lazydev already provides the Neovim API
