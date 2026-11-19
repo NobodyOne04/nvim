@@ -1,5 +1,6 @@
 -- lazy.nvim bootstrap + setup. Plugin specs are in lua/plugins/*.lua.
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+local dir = require("config.plugin_dir")
+local lazypath = dir .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
 	local out = vim.fn.system({
 		"git", "clone", "--filter=blob:none", "--branch=stable",
@@ -14,6 +15,8 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
 	spec = { { import = "plugins" } },
+	root = dir .. "/lazy",
+	rocks = { root = dir .. "/lazy-rocks" },
 	install = { colorscheme = { "tokyonight" } },
 	ui = { border = "rounded" },
 	checker = { enabled = false },               -- no background update checks

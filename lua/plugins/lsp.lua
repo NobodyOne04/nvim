@@ -6,7 +6,7 @@ return {
 		"mason-org/mason.nvim",
 		cmd = { "Mason", "MasonInstall", "MasonUpdate" },
 		build = ":MasonUpdate",
-		opts = { ui = { border = "rounded", icons = { package_installed = "●", package_pending = "◐", package_uninstalled = "○" } } },
+		opts = { install_root_dir = require("config.plugin_dir") .. "/mason", ui = { border = "rounded", icons = { package_installed = "●", package_pending = "◐", package_uninstalled = "○" } } },
 	},
 
 	{

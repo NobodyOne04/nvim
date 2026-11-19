@@ -10,7 +10,9 @@ SHELL   := /bin/bash
 
 CONFIG  := $(HOME)/.config/nvim
 STAMP   := $(shell date +%Y%m%d-%H%M%S)
-PYHOST  := $(HOME)/.local/share/nvim/python-host
+# same place as lua/config/plugin_dir.lua picks (archminimal-setup ADR-0010)
+PLUGDIR := $(if $(wildcard /opt/archminimal),$(or $(ARCHMINIMAL_PLUGINS),/opt/archminimal/plugins)/nvim,$(HOME)/.local/share/nvim)
+PYHOST  := $(PLUGDIR)/python-host
 SERVERS := pyright lua-language-server bash-language-server typescript-language-server gopls goimports delve
 
 .PHONY: help install link unlink tools sync update lsp notebook kernel check health startup

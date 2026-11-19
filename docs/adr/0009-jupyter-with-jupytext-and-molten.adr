@@ -37,6 +37,7 @@ plots in the terminal.
 - **Consequences**: the notebook is plain Python in the buffer, so all tooling works
   unchanged. Needs `uv`, a python host per machine, ImageMagick, and tmux passthrough for
   images.
+- **Plugin location** (2026-11-19): lazy's root, mason, treesitter parsers and the python host now live under `lua/config/plugin_dir.lua`'s path, `$ARCHMINIMAL_PLUGINS/nvim` (`/opt/archminimal/plugins/nvim`, or `stdpath("data")` on machines without `/opt/archminimal`), per archminimal-setup ADR-0010.
 
 ## Technologies and alternatives
 - Involved: jupytext.nvim + jupytext CLI, molten-nvim, image.nvim, Jupyter

@@ -33,6 +33,7 @@ startup stays around 25 ms.
   a diff. Lazy-loaded plugins hide errors until triggered, so testing loads them all
   ([0011](0011-headless-make-check.adr)). Each machine runs `make sync` after a pull that
   changed the lockfile.
+- **Plugin location** (2026-11-19): lazy's root, mason, treesitter parsers and the python host now live under `lua/config/plugin_dir.lua`'s path, `$ARCHMINIMAL_PLUGINS/nvim` (`/opt/archminimal/plugins/nvim`, or `stdpath("data")` on machines without `/opt/archminimal`), per archminimal-setup ADR-0010.
 
 ## Technologies and alternatives
 - Involved: lazy.nvim, git.
