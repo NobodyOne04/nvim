@@ -29,6 +29,7 @@ return {
 		opts = { parsers = parsers }, -- also read by scripts/ts-install.lua (`make sync`)
 		config = function(_, opts)
 			-- needs the tree-sitter CLI and a C compiler (scripts/install-tools.sh installs both)
+			require("nvim-treesitter").setup({ install_dir = require("config.plugin_dir") .. "/site" })
 			require("nvim-treesitter").install(opts.parsers)
 			vim.api.nvim_create_autocmd("FileType", {
 				group = vim.api.nvim_create_augroup("archminimal-ts", { clear = true }),

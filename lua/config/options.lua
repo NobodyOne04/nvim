@@ -69,7 +69,7 @@ opt.timeoutlen = 400
 -- It gets its own venv from `make notebook`; pointing Neovim straight at it
 -- skips the PATH search that cost ~480 ms every time a .py file was opened.
 -- Without that venv the provider stays off.
-local python_host = vim.fn.stdpath("data") .. "/python-host/bin/python"
+local python_host = require("config.plugin_dir") .. "/python-host/bin/python"
 if vim.uv.fs_stat(python_host) then
 	vim.g.python3_host_prog = python_host
 else

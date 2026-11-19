@@ -14,6 +14,7 @@ keys, notebooks, past reviews); this file is for you.
 | keymaps not tied to a plugin | `lua/config/keymaps.lua` |
 | autocmds, diagnostics look | `lua/config/autocmds.lua` |
 | lazy.nvim bootstrap/setup | `lua/config/lazy.lua` |
+| where plugins, mason, parsers, python host live (`/opt/archminimal/plugins/nvim`) | `lua/config/plugin_dir.lua` |
 | Jupyter cell helpers (`# %%`) | `lua/config/notebook.lua` |
 | ADR files (`.adr`: picker, status keys) | `lua/config/adr.lua`, wired in `autocmds.lua` |
 | decision records (why the config is this way) | `docs/adr/NNNN-*.adr`, index `docs/adr/README.md`; read before changing a recorded decision |
@@ -60,7 +61,7 @@ nvim --headless "+checkhealth <name>" "+w! /path/out.txt" +qa!   # health report
 3. Lazy-loaded plugins aren't set up until triggered: `"+Lazy! load all"` before inspecting one headless.
 4. LSP needs a moment: in a headless test, `vim.defer_fn(…, 8000)` before reading `vim.diagnostic.get(0)`.
 5. molten's commands come from `:UpdateRemotePlugins` (`make notebook`); don't give it a `cmd` lazy trigger.
-   The python host is `~/.local/share/nvim/python-host` (set in `options.lua`; without it the provider is off).
+   The python host is `/opt/archminimal/plugins/nvim/python-host` (set in `options.lua`; without it the provider is off).
 6. nvim-treesitter is on the `main` branch (Neovim 0.12+ API). Never use the old
    `require("nvim-treesitter.configs")` setup.
 7. `:checkhealth` noise to ignore: optional tools (java, php, julia, luarocks), Snacks image checks
@@ -74,4 +75,4 @@ nvim --headless "+checkhealth <name>" "+w! /path/out.txt" +qa!   # health report
   the change out; after a merge, `git switch main && git pull`.
 - After a merge, remind me to `git pull` on the other machine and `make sync` if `lazy-lock.json` changed.
 - Ask before `make install`, `make tools`, `make link`/`unlink`, `make update` (rewrites the lockfile), or
-  touching `~/.local/share/nvim/lazy` (installed plugin code).
+  touching `/opt/archminimal/plugins/nvim/lazy` (installed plugin code).

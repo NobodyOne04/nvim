@@ -24,7 +24,7 @@ make install
 | `make link` | links this repo to `~/.config/nvim`; an existing config is moved to `~/.config/nvim.bak-<date>`, never deleted |
 | `make sync` | installs plugins at the versions in `lazy-lock.json`, removes plugins the config no longer uses, fetches blink.cmp's fuzzy matcher |
 | `make lsp` | installs pyright, lua_ls, bashls, ts_ls, gopls and goimports with mason |
-| `make notebook` | Jupyter support: a Python venv for molten at `~/.local/share/nvim/python-host` (pynvim, jupyter_client) and the `jupytext` CLI (`uv tool`) |
+| `make notebook` | Jupyter support: a Python venv for molten at `/opt/archminimal/plugins/nvim/python-host` (pynvim, jupyter_client) and the `jupytext` CLI (`uv tool`) |
 
 Updating an existing install: `git pull && make sync`.
 
