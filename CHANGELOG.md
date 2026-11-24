@@ -17,6 +17,7 @@
 - tmux navigation: Alt-h/j/k/l across nvim splits and tmux panes (#1)
 
 ### Fixed
+- `make install` never runs its steps in parallel (`make -j` started nvim before it was installed); the Python REPL falls back to `python3` when `ipython` isn't installed (Codex audit)
 - Claude knows the file and line as soon as it connects, without moving the cursor first
 - Claude sees the line under the cursor, not just the file name
 - Alt-h/j/k/l stops at the screen edge as intended: smart-splits had renamed its options and was wrapping
