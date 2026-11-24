@@ -28,7 +28,8 @@ return {
 		config = function()
 			require("iron.core").setup({
 				config = {
-					repl_definition = { python = { command = { "ipython", "--no-autoindent" } } },
+					-- ipython when installed (a project venv or uv tool), else the plain REPL
+					repl_definition = { python = { command = vim.fn.executable("ipython") == 1 and { "ipython", "--no-autoindent" } or { "python3" } } },
 					repl_open_cmd = "vertical botright 60 split",
 				},
 				keymaps = {

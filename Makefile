@@ -15,6 +15,9 @@ PLUGDIR := $(if $(wildcard /opt/archminimal),$(or $(ARCHMINIMAL_PLUGINS),/opt/ar
 PYHOST  := $(PLUGDIR)/python-host
 SERVERS := pyright lua-language-server bash-language-server typescript-language-server gopls goimports delve
 
+# install's steps depend on each other (nvim before plugins, plugins before mason): never in parallel
+.NOTPARALLEL:
+
 .PHONY: help install link unlink tools sync update lsp notebook kernel check health startup
 
 help: ## Show this help
